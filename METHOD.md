@@ -14,7 +14,7 @@ the expensive error. Out of scope, as observed since: captions, overlaid graphic
 | | original 100-epoch runs | Update 1 |
 |---|---|---|
 | videos | 37 processed files (36 groups) | 173 videos, all 1920 × 1080, H.264, 4:2:0 |
-| frames | the labelled snapshot of those files | 5,010,602 frames from the dataset-builder pipeline; 1,019,201 of them labelled by the VLM teacher |
+| frames | the labelled snapshot of those files; 71,562 training frames (13,198 sharp, 58,364 blurred) | 5,010,602 frames from the dataset-builder pipeline; 1,019,201 of them labelled by the VLM teacher; 589,663 training frames (Section 5) |
 | photos | 48,797 originals (33,484 train / 7,656 validation / 7,657 test) | unchanged |
 
 ## 4. Labelling
@@ -66,7 +66,7 @@ original weights keep their behaviour bit for bit.
 | trunk | ConvNeXt-Base, ImageNet-pretrained, to stride 16 (60.2 M parameters with the head) |
 | head and pooling | as before: one logit per 16 px cell, masked log-sum-exp pooling with a learnable sharpness r (4.0 at the start, 0.86 at the end) |
 | loss | image-level binary cross-entropy; on photos also the dense cell term (weight 0.5), every textured cell carrying the photo label |
-| strata per epoch | 12,000 each: sharp frames, blurred frames, sharp photos, blurred photos (48,000 samples) |
+| strata per epoch | 12,000 each: sharp frames, blurred frames, sharp photos, blurred photos (48,000 samples; the original runs: 3,000 each, 12,000 samples) |
 | optimisation | AdamW, learning rate 1e-4 (trunk) / 1e-3 (head), weight decay 0.05, warmup 0.25 epoch, cosine decay to 1%, gradient clip 1.0, batch 8 × 2 accumulation |
 | length | 30 epochs, 90,440 optimizer steps; each sharp training frame seen about once, each blurred about 1.5 times |
 | sampling | resume-exact: a chain of permutations per stratum keyed by seed, stratum and pass, so every sample comes once before any comes twice; the last smaller batch of a size bucket is trained too |

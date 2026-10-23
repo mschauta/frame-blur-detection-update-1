@@ -18,13 +18,14 @@ evidence behind every number on this page.
 | | Frame Blur Detection (100-epoch runs) | Update 1 |
 |---|---|---|
 | frame material | 37 processed video files (36 groups) | 173 videos, 5,010,602 frames, ~1.0 million labelled by the same frozen VLM teacher |
-| frame selection | VLM labels, measurement ranking inside shots | v8 rules: films as units (both releases of a film twice released at different bitrates), a film-relative sharp class, the measurement only ranks inside a shot, no thinning (METHOD §5) |
-| training frames | — | 589,663 (349,624 sharp, 240,039 blurred) |
-| validation / test | 11 / 7 video groups | 3 / 3 films chosen by hand, none of their frames trained on |
+| frame selection | sharp = `sss`, per shot only the best 20% by measured sharpness (10% if most of the shot is blurred), ≥ 0.2 s apart; blurred = `bbb` + `bsb`, all kept | v8 rules: films as units (both releases of a film twice released at different bitrates), a film-relative sharp class, the measurement only ranks inside a shot, no thinning (METHOD §5) |
+| training frames | 71,562 (13,198 sharp, 58,364 blurred), 18 video groups | 589,663 (349,624 sharp, 240,039 blurred) |
+| validation / test | 11 / 7 video groups, 3,301 / 3,296 frames per class | 3 / 3 films chosen by hand, 16,190 / 20,732 frames per class; none of their frames trained on |
 | photo anchors | 33,484 training photos, 0–3 px sharp / 16–30 px blurred, through H.264 | **unchanged** |
 | fingerprint | computed inside bf16 autocast (bf16-rounded) | computed in float32, outside autocast |
 | model | ConvNeXt-Small (~34 M parameters) to stride 16 | ConvNeXt-Base (60.2 M parameters) to stride 16; the same head and pooling |
-| training | 100 epochs | 30 epochs × 48,000 samples, 90,440 optimizer steps; the last epoch is the result |
+| training | 100 epochs × 12,000 samples (1.2 M) | 30 epochs × 48,000 samples (1.44 M), 90,440 optimizer steps |
+| result | the last epoch | the last epoch |
 
 ## Weights
 
