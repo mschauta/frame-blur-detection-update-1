@@ -9,9 +9,9 @@ bf16-rounded one.
 
 The task, the principles, the labelling, the photo construction and the model design are described in the original
 repository's [README](https://github.com/mschauta/frame-blur-detection#readme) and
-[METHOD.md](https://github.com/mschauta/frame-blur-detection/blob/main/METHOD.md). This repository documents only what
-is new: [METHOD.md](METHOD.md) lists the changes section by section, [reproduction/](reproduction/) holds the aggregate
-evidence behind every number on this page.
+[METHOD.md](https://github.com/mschauta/frame-blur-detection/blob/main/METHOD.md). The development history below explains how the approach evolved. The rest of this repository focuses on
+Update 1: [METHOD.md](METHOD.md) lists the changes section by section, and [reproduction/](reproduction/) holds
+the aggregate evidence behind the reported results.
 
 ## Development history
 
