@@ -1,0 +1,101 @@
+{
+ "scored_frames": 5010602,
+ "videos": 173,
+ "vlm_labelled_scored": 1014161,
+ "scene_consistency": {
+  "definition": "per shot with both decisions at the 95% point: AUC of the measured region motion for the blurred-vs-sharp decision; 0.5 = independent of motion",
+  "median_auc_model": 0.8537136165941787,
+  "median_auc_vlm_labels": 0.8627968939054912
+ },
+ "two_releases": {
+  "films": 31,
+  "definition": "the same film in two releases (different bitrate), frames matched by time; agreement of the decision at the 95% point",
+  "median_agreement_r95": 0.8501435509404599,
+  "median_kappa_r95": 0.6826753278460086,
+  "median_logit_pearson": 0.7953312232596205
+ },
+ "by_dominant_motion": {
+  "definition": "labelled frames, motion type from the non-learned measurement; share called blurred at the thresholds",
+  "rows": [
+   {
+    "motion": "camera / global",
+    "vlm_label": "blurred, caught",
+    "n": 103624,
+    "r90": 0.9664556473403845,
+    "r95": 0.9854184358835791,
+    "r98": 0.9930228518489925
+   },
+   {
+    "motion": "camera / global",
+    "vlm_label": "sharp, called blurred",
+    "n": 87552,
+    "r90": 0.12069398757309942,
+    "r95": 0.20103481359649122,
+    "r98": 0.30179778874269003
+   },
+   {
+    "motion": "subject / local",
+    "vlm_label": "blurred, caught",
+    "n": 76703,
+    "r90": 0.8689360259703011,
+    "r95": 0.930837125014667,
+    "r98": 0.9676414221086529
+   },
+   {
+    "motion": "subject / local",
+    "vlm_label": "sharp, called blurred",
+    "n": 367490,
+    "r90": 0.06143296416229013,
+    "r95": 0.11970393752210945,
+    "r98": 0.22169310729543662
+   },
+   {
+    "motion": "mixed",
+    "vlm_label": "blurred, caught",
+    "n": 129319,
+    "r90": 0.9742651891833374,
+    "r95": 0.99184187938354,
+    "r98": 0.9974249723551837
+   },
+   {
+    "motion": "mixed",
+    "vlm_label": "sharp, called blurred",
+    "n": 52873,
+    "r90": 0.30499498799008945,
+    "r95": 0.47460896866075314,
+    "r98": 0.6441094698617442
+   }
+  ]
+ },
+ "agreement_with_motion_measurement": {
+  "image_level_spearman_validation_frames": {
+   "region": 0.714,
+   "subject": 0.729,
+   "camera": 0.201,
+   "frames": 32380,
+   "score": "image logit"
+  },
+  "cell_level_within_frame_spearman_median": {
+   "subject_motion": 0.339,
+   "frames": 2000,
+   "cells": 137934,
+   "cell": "160 px measurement cell (mean of the 10 x 10 model cells), textured"
+  }
+ },
+ "etalon_photos_cell_map": {
+  "photos": 3981,
+  "source": "validation and test split, 0 px (no added blur)",
+  "h264_crf23": {
+   "max_cell_logit_median": -15.25,
+   "max_cell_logit_99pct": -5.83,
+   "max_cell_logit_max": 0.06,
+   "photos_with_a_cell_at_or_above_0": 0.0003
+  },
+  "uncoded_png": {
+   "max_cell_logit_median": -2.81,
+   "photos_with_a_cell_at_or_above_0": 0.1869,
+   "photos_with_a_cell_at_or_above_0.5": 0.0847,
+   "image_logit_max": 4.8
+  }
+ }
+}

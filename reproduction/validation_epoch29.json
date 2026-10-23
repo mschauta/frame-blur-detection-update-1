@@ -1,0 +1,66 @@
+{
+ "split": "validation: 3 films, frames selected by the v8 rules, 1:1 per film; photos: 2,000 sharp (0-3 px) and 2,000 blurred (16-30 px) variants of the validation photos at fixed grid points",
+ "frames": {
+  "n": 32380,
+  "n_blurred": 16190,
+  "auc": 0.9620611667883049,
+  "balanced_acc": 0.8926497838171712,
+  "recall_sharp": 0.9126621371216801,
+  "recall_blurred": 0.8726374305126622
+ },
+ "photos": {
+  "n": 4000,
+  "n_blurred": 2000,
+  "auc": 1.0,
+  "balanced_acc": 1.0,
+  "recall_sharp": 1.0,
+  "recall_blurred": 1.0
+ },
+ "frames_by_code": {
+  "bbb": {
+   "n": 9449,
+   "n_blurred": 9449,
+   "auc": NaN,
+   "balanced_acc": 0.9558683458567044,
+   "recall_sharp": NaN,
+   "recall_blurred": 0.9558683458567044
+  },
+  "bsb": {
+   "n": 6741,
+   "n_blurred": 6741,
+   "auc": NaN,
+   "balanced_acc": 0.7559709241952233,
+   "recall_sharp": NaN,
+   "recall_blurred": 0.7559709241952233
+  },
+  "ssb": {
+   "n": 2457,
+   "n_blurred": 0,
+   "auc": NaN,
+   "balanced_acc": 0.8111518111518111,
+   "recall_sharp": 0.8111518111518111,
+   "recall_blurred": NaN
+  },
+  "sss": {
+   "n": 13733,
+   "n_blurred": 0,
+   "auc": NaN,
+   "balanced_acc": 0.9308235636787301,
+   "recall_sharp": 0.9308235636787301,
+   "recall_blurred": NaN
+  }
+ },
+ "thresholds": {
+  "r90": 0.2324182912707325,
+  "r95": 0.054909942671656616,
+  "r98": 0.016399075724184527
+ },
+ "frames_at_thresholds": {
+  "sharp_kept_r90": 0.8849289684990735,
+  "blurred_caught_r90": 0.9,
+  "sharp_kept_r95": 0.794626312538604,
+  "blurred_caught_r95": 0.9499691167387276,
+  "sharp_kept_r98": 0.6650401482396541,
+  "blurred_caught_r98": 0.9799876466954911
+ }
+}

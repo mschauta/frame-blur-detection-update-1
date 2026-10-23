@@ -1,0 +1,158 @@
+{
+ "what": "the same unseen etalon photo with uniform linear camera motion of known length L, one fixed direction per photo, blur in linear light, then H.264 CRF 23; share called blurred at the published thresholds",
+ "photos": 300,
+ "photo_sources": "validation and test split of the photo pool (never trained on), no 4K frames",
+ "L_px": [
+  0.0,
+  0.5,
+  1.0,
+  1.5,
+  2.0,
+  2.5,
+  3.0,
+  4.0,
+  5.0,
+  6.0,
+  8.0,
+  10.0,
+  12.0,
+  16.0,
+  20.0,
+  24.0,
+  30.0
+ ],
+ "thresholds": {
+  "r90": 0.23241829999999963,
+  "r95": 0.05490985000000001,
+  "r98": 0.016399000000000018
+ },
+ "per_L": [
+  {
+   "L": 0.0,
+   "median_logit": -22.56629467010498,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 0.5,
+   "median_logit": -22.73196792602539,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 1.0,
+   "median_logit": -22.66569232940674,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 1.5,
+   "median_logit": -22.676487922668457,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 2.0,
+   "median_logit": -22.664169311523438,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 2.5,
+   "median_logit": -22.507511138916016,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0033333333333333335
+  },
+  {
+   "L": 3.0,
+   "median_logit": -22.46395206451416,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 4.0,
+   "median_logit": -22.048583030700684,
+   "blur_r90": 0.0,
+   "blur_r95": 0.0,
+   "blur_r98": 0.0
+  },
+  {
+   "L": 5.0,
+   "median_logit": -21.22333526611328,
+   "blur_r90": 0.0033333333333333335,
+   "blur_r95": 0.0033333333333333335,
+   "blur_r98": 0.006666666666666667
+  },
+  {
+   "L": 6.0,
+   "median_logit": -20.091754913330078,
+   "blur_r90": 0.0033333333333333335,
+   "blur_r95": 0.0033333333333333335,
+   "blur_r98": 0.006666666666666667
+  },
+  {
+   "L": 8.0,
+   "median_logit": -13.878509521484375,
+   "blur_r90": 0.06333333333333334,
+   "blur_r95": 0.07333333333333333,
+   "blur_r98": 0.08333333333333333
+  },
+  {
+   "L": 10.0,
+   "median_logit": 7.9254937171936035,
+   "blur_r90": 0.7933333333333333,
+   "blur_r95": 0.83,
+   "blur_r98": 0.86
+  },
+  {
+   "L": 12.0,
+   "median_logit": 16.301237106323242,
+   "blur_r90": 1.0,
+   "blur_r95": 1.0,
+   "blur_r98": 1.0
+  },
+  {
+   "L": 16.0,
+   "median_logit": 20.27209758758545,
+   "blur_r90": 1.0,
+   "blur_r95": 1.0,
+   "blur_r98": 1.0
+  },
+  {
+   "L": 20.0,
+   "median_logit": 21.23036003112793,
+   "blur_r90": 1.0,
+   "blur_r95": 1.0,
+   "blur_r98": 1.0
+  },
+  {
+   "L": 24.0,
+   "median_logit": 21.60083770751953,
+   "blur_r90": 1.0,
+   "blur_r95": 1.0,
+   "blur_r98": 1.0
+  },
+  {
+   "L": 30.0,
+   "median_logit": 21.59659767150879,
+   "blur_r90": 1.0,
+   "blur_r95": 1.0,
+   "blur_r98": 1.0
+  }
+ ],
+ "flip_L_50pct": {
+  "r90": 9.19634703196347,
+  "r95": 9.127753303964758,
+  "r98": 9.072961373390559
+ },
+ "pair_order_accuracy_0_3_px": 0.6174603174603175,
+ "pair_order_accuracy_3_16_px": 0.9921428571428571,
+ "strictly_increasing_0_1_2_3": 0.21333333333333335
+}
