@@ -13,6 +13,149 @@ repository's [README](https://github.com/mschauta/frame-blur-detection#readme) a
 is new: [METHOD.md](METHOD.md) lists the changes section by section, [reproduction/](reproduction/) holds the aggregate
 evidence behind every number on this page.
 
+## Development history
+
+Frame Blur Detection grew out of an attempt to **measure sharpness in video**, not out of an initial plan to train a
+binary image classifier. Each change of method addressed a limitation found in the previous stage. The long-term goal
+has remained the same: assess whether a video frame is acceptably sharp without a different manually tuned rule for
+each scene, camera view or source.
+
+### 1. Building the video dataset
+
+The first software pipeline imported videos, decoded their frames at the source frame rate and stored the decoded
+images losslessly. Frames with burnt-in subtitles or overlaid text were excluded. SAM3-assisted identification of
+video watermarks helped construct per-video validity masks; those regions could then be excluded from measurements,
+and masked or deliberately left visible during model training.
+
+Frames were grouped by visual similarity into short, relatively stable framing units called *shots*. These were
+analysis units, not necessarily editorial cuts: changes in camera position or framing could divide a continuous take.
+This grouping made it possible to compare frames under approximately similar visual conditions.
+
+### 2. Why direct measurement was not enough
+
+The original approach combined single-frame sharpness measurements with evidence from **neighbouring frames**.
+Comparisons of the preceding, current and following frames estimated camera and regional motion; within-shot sharpness
+ranking identified relatively better and worse frames. Temporal evidence was valuable because an isolated image does
+not reveal how the subject or camera moved between exposures.
+
+But measured inter-frame motion is **not the same as exposure blur**. Shutter time was generally unknown; fine detail,
+smooth surfaces, subject distance, camera movement and composition all affected how much blur was visible. Thresholds
+that worked on medium or long shots failed on close-ups and extreme close-ups. Attempts to determine shot size
+automatically were also unreliable, preventing robust view-specific thresholds.
+
+The measurements were therefore retained for **ranking and consistency checks within a shot**, not as a universal
+absolute label or a model input. A source-independent sharp/blurred boundary still had to be learned.
+
+### 3. The Qwen teacher: a workable visual judgement, with label noise
+
+The breakthrough in dataset labelling came from a frozen **Qwen3.5-4B** vision-language model. In pilot observations
+it judged difficult close-ups and low-texture surfaces more usefully than the hand-designed thresholds, without first
+requiring a reliable camera-view classification. This was a practical improvement in the evaluated material, not proof
+of viewpoint-independent accuracy on arbitrary images.
+
+Although the desired output was initially binary, the final labelling procedure asked **three separate yes/no
+questions**: one about visible blur or motion blur, one about whether the *video frame* is sharp, and one about whether
+the *image* is sharp. Responses were preserved as codes. In the original selection, `sss` was retained as sharp and
+`bbb` / `bsb` as blurred; contradictory and borderline combinations were excluded. Later selection rules also
+introduced film-relative handling of some `ssb` frames.
+
+This improved the ability to filter ambiguous cases, but it also exposed sensitivity to wording and image content.
+The labels remained **teacher judgements, not independently established ground truth**. In addition, three VLM
+queries per frame made large-scale labelling computationally expensive. The next objective was a much faster
+dedicated model that could learn from the retained labels without running Qwen on every new frame.
+
+### 4. ConvNeXt and the signed edge fingerprint
+
+The detector experiments used pretrained ConvNeXt backbones. A DINOv3-pretrained ConvNeXt-Small was tested, but
+under the tested training recipe the **ImageNet-pretrained ConvNeXt** was preferred.
+
+The original research direction was the **signed edge fingerprint** inherited from
+[RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling). The earlier `m09` mesh reconstruction
+defines a signed luminance residual, `d = Y − K * Y`: the part of the image not preserved by the reconstruction.
+It emphasises fine structure and can retain signed patterns associated with broadened or repeated contours. The
+residual also contains texture, noise and codec artefacts; it is not a pure or physically calibrated blur measurement.
+
+To test whether this representation was actually useful, the first published study trained otherwise comparable
+models on **RGB**, **grayscale** and the **signed edge fingerprint**. All three carried substantial information for
+the reported discrimination task; the results did not establish that the fingerprint was universally superior.
+The fingerprint remained the chosen line of development because it directly extended the author's mesh experiments
+and allowed blur-related edge structure to be studied without feeding the model conventional colour imagery.
+
+### 5. Synthetic anchors for a problem without absolute sharpness labels
+
+Real video frames do not provide a clean physical reference for "perfectly sharp". Even a frame selected as sharp
+relative to its shot may contain native motion blur, intentional defocus or compression artefacts; blur itself spans
+a continuum rather than two natural categories.
+
+The training therefore combined selected real frames with **controlled synthetic photographs**. Original
+photographs were accepted as composition-level sharp references, then given known amounts of added camera-motion
+blur. The original training construction assigned **0–3 px** of added blur to the sharp class and **16–30 px** to the
+blurred class; intermediate synthetic lengths were **not trained**. The model had to encounter the intervening
+transition through the training evidence rather than through an arbitrary synthetic cut-off label.
+
+The photographs were passed through **H.264 encoding and decoding** before training. This reduced a potential
+shortcut in which the residual model might distinguish uncoded synthetic photos from decoded video frames instead
+of learning relevant blur patterns. These are construction labels: zero *added* blur does not guarantee that every
+part of the source photograph was physically sharp.
+
+### 6. A binary decision built from a spatial cell map
+
+From the first published models, the ConvNeXt head produced **one local logit per 16-pixel cell**, not just one
+whole-frame output. A masked log-sum-exp operation pooled the local outputs into a frame-level score. Synthetic
+photos also supplied dense cell-level supervision because the injected camera-motion blur applied globally;
+native frames supplied image-level labels only.
+
+This design made **cell maps** available alongside sharp/blurred classification. The maps represent learned local
+blur evidence, not independently verified pixel-wise segmentation or physical blur length. Their existence nevertheless
+made it possible to examine *where* a model was responding, and later motivated training with richer spatial targets.
+
+### 7. First publication: establishing the approach
+
+The original [Frame Blur Detection](https://github.com/mschauta/frame-blur-detection) publication reported
+**ConvNeXt-Small** models trained on RGB, grayscale and the signed fingerprint. Its labelled snapshot covered
+**37 processed video files (36 distinct groups)**, with **71,562 selected training frames** plus synthetic photo
+anchors. The study compared input representations, checked generalisation on video-group splits and documented
+limitations of teacher labels, native blur and the synthetic/video coding path.
+
+The central finding was that a dedicated network could learn a useful blur-specific decision from the fingerprint
+alone on the evaluated material. Universality across arbitrary video sources remained an aim, not a demonstrated
+property.
+
+### 8. Update 1: scaling the material and improving the fingerprint
+
+**This repository is Update 1.** It expands the corpus to **173 videos and 5,010,602 frames**, with
+**589,663 selected training frames** and the same synthetic photo pool. The detector grows from ConvNeXt-Small to
+**ConvNeXt-Base**, while the `m09` fingerprint changes from a bfloat16-rounded convolution to an explicitly
+**float32** calculation. The revised selection rules treat films, including alternate-bitrate releases, as units;
+frame measurements still serve only as within-shot ranking or independent checks.
+
+After the `round3_base_p99_ep029.pt` checkpoint had been fixed, the trained detector was run over the
+**entire 5.01-million-frame corpus**, producing frame scores and spatial cell outputs. The results and their
+limitations are documented below. In particular, the frame score is still a **thresholded classifier score**,
+not a calibrated continuous measurement of physical blur.
+
+This shift also matters operationally. Preliminary pipeline observations suggest that the Qwen teacher labels
+about **40,000 frames/day**, whereas Round 3 processed the complete corpus in roughly **one day** for frame scores
+and about **26 hours** with cell maps. These are **not controlled benchmarks**: timing boundaries, hardware
+utilisation and the earlier measurement/import costs still need separate reproducible profiling. Training time,
+inference time and video preparation must not be conflated.
+
+### Next research direction — Update 2 (training in progress)
+
+A **separate future repository** is planned for Update 2; it is **not a completed result of this release**.
+The experiment currently being trained, `v9_base_selfmap_v2`, keeps the **signed edge fingerprint** and
+ConvNeXt-Base architecture but proposes a different learning target: rather than primarily reproducing binary
+sharp/blurred labels, it uses the preceding model's **continuous cell-level predictions as soft targets** across
+approximately **4.85 million training frames**, with controlled synthetic photographs retained.
+
+The intended outputs are a **continuous frame-level blur measure** (weighted blur mass, `M`) and a
+**spatial cell map**, with fast inference on the fingerprint representation. This is a form of spatial
+self-distillation: the earlier model supplies training targets, rather than directly donating its trained
+weights. Teacher-generated targets may also propagate errors and are **not independent ground truth**.
+
+**Training is still underway.** No Update 2 accuracy, speedup or final training outcome is claimed here;
+its implementation, benchmarks and evaluation will belong to the separate Update 2 publication.
+
 ## What changed
 
 | | Frame Blur Detection (100-epoch runs) | Update 1 |
