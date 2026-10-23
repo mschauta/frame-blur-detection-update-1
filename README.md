@@ -1,5 +1,7 @@
 # Frame Blur Detection — Update 1
 
+![Frame Blur Detection — Update 1 infographic](figures/frame_blur_detection_update_1_poster_en.png)
+
 The second published model of [Frame Blur Detection](https://github.com/mschauta/frame-blur-detection): a blur-specific
 sharp / blurred classifier for video frames, on the same input as before — the signed edge fingerprint of the
 [RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling) `m09` reconstruction — and with the same
