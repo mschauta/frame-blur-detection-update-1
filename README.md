@@ -285,10 +285,14 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
   window is real blur that a film may accept. The training material comes from handheld-camera, people-centred videos.
 - **Uncoded images** are outside the training distribution.
 - **Validity masks leak at their border.** With a mask, the fingerprint of a valid pixel next to the mask is still
-  computed from the masked neighbours, and those pixels enter the per-image p99 scale. On a 1080p frame with a 160 px
-  masked strip, white content under the mask moves the scale by +14% (black: +8%), i.e. every valid value by about
-  −6% (−4%). The published weights were trained with this behaviour (masks on half of the samples), so it is
-  documented and tested (`tests/test_model.py`, expected failure) rather than changed; `classify.py` uses no mask.
+  computed from the masked neighbours, and those pixels enter the per-image p99 scale. In an artificial worst case, a
+  1080p frame with a 160 px masked strip, white content under the mask moves the scale by +14% (black: +8%), i.e.
+  every valid value by about −6% (−4%). With the training's own watermark masks the effect is negligible: on 594
+  masked training frames the scale moved by 0.00% (median) and at most 0.45%. The valid pixels next to a mask are
+  0.03% of the valid pixels; there the watermark's edge leaks in (about twice the usual residual). The leak does not
+  depend on the label, as the masks were applied to both classes alike. The published weights were trained with this
+  behaviour (masks on half of the samples), so it is documented and tested (`tests/test_model.py`, expected failure)
+  rather than changed; `classify.py` uses no mask.
 
 ## Data availability
 
