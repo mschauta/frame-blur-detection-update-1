@@ -1,5 +1,6 @@
 {
  "what": "every VLM-labelled frame of the 6 held-out films (none of their frames was trained on), scored once after the checkpoint had been fixed; sharp = sss (plus ssb in ssb-dominant films), blurred = bbb + bsb; thresholds from the validation split, so the caught share on all labelled frames differs from 90/95/98%; film names withheld",
+ "auc_ci95": "95% interval of the AUC by a cluster bootstrap over shots (2,000 resamples; shots resampled with replacement within each film, as frames of one shot are not independent). It is conditional on these films: with 3 films per group the film-to-film variance cannot be estimated, so the range of the per-film AUCs is given beside it (per_film_auc_range).",
  "groups": [
   {
    "group": "validation films (3)",
@@ -14,7 +15,15 @@
    "balacc_r95": 0.8714214184064855,
    "sharp_kept_r98": 0.6613524358387418,
    "blur_caught_r98": 0.9764620373476463,
-   "balacc_r98": 0.818907236593194
+   "balacc_r98": 0.818907236593194,
+   "auc_ci95": [
+    0.9510840324392518,
+    0.9651982423434926
+   ],
+   "per_film_auc_range": [
+    0.9535766613117422,
+    0.9645042649750033
+   ]
   },
   {
    "group": "test films (3)",
@@ -29,7 +38,15 @@
    "balacc_r95": 0.8815193525917515,
    "sharp_kept_r98": 0.6981728016058093,
    "blur_caught_r98": 0.9698344383699741,
-   "balacc_r98": 0.8340036199878917
+   "balacc_r98": 0.8340036199878917,
+   "auc_ci95": [
+    0.9546607277325956,
+    0.9748457227893874
+   ],
+   "per_film_auc_range": [
+    0.9541684278824643,
+    0.9804125721772781
+   ]
   },
   {
    "group": "validation + test (6 films)",
@@ -44,7 +61,15 @@
    "balacc_r95": 0.876765549603056,
    "sharp_kept_r98": 0.6789184621884242,
    "blur_caught_r98": 0.9725484808938343,
-   "balacc_r98": 0.8257334715411293
+   "balacc_r98": 0.8257334715411293,
+   "auc_ci95": [
+    0.954406753642952,
+    0.9686889735479762
+   ],
+   "per_film_auc_range": [
+    0.9535766613117422,
+    0.9804125721772781
+   ]
   },
   {
    "group": "validation + test, only the frames the v8 rules select (1:1)",
@@ -78,7 +103,12 @@
    "blur_caught_r98": 0.9334388185654009,
    "balacc_r98": 0.848222601997031,
    "model_sharp_r95": 0.5843932084455861,
-   "qwen_sharp": 0.5019177218515211
+   "qwen_sharp": 0.5019177218515211,
+   "shots": 378,
+   "auc_ci95": [
+    0.9295003389023742,
+    0.9714199011271404
+   ]
   },
   {
    "film": "validation film A",
@@ -95,7 +125,12 @@
    "blur_caught_r98": 0.9817131857555341,
    "balacc_r98": 0.8116940522072338,
    "model_sharp_r95": 0.5717016029593095,
-   "qwen_sharp": 0.6939917533870018
+   "qwen_sharp": 0.6939917533870018,
+   "shots": 396,
+   "auc_ci95": [
+    0.9484946480712315,
+    0.9675219472081271
+   ]
   },
   {
    "film": "test film B",
@@ -112,7 +147,12 @@
    "blur_caught_r98": 0.9900797329872056,
    "balacc_r98": 0.8344973692209657,
    "model_sharp_r95": 0.5197888467785599,
-   "qwen_sharp": 0.6515249418454381
+   "qwen_sharp": 0.6515249418454381,
+   "shots": 446,
+   "auc_ci95": [
+    0.9682371374753411,
+    0.9831064816124993
+   ]
   },
   {
    "film": "validation film B",
@@ -129,7 +169,12 @@
    "blur_caught_r98": 0.9617368873602752,
    "balacc_r98": 0.8277754820397736,
    "model_sharp_r95": 0.6151972024764962,
-   "qwen_sharp": 0.7133114215283484
+   "qwen_sharp": 0.7133114215283484,
+   "shots": 358,
+   "auc_ci95": [
+    0.93788473633486,
+    0.9663383806497254
+   ]
   },
   {
    "film": "validation film C",
@@ -146,7 +191,12 @@
    "blur_caught_r98": 0.9914420196833548,
    "balacc_r98": 0.8010645212920591,
    "model_sharp_r95": 0.39348208499213033,
-   "qwen_sharp": 0.5465217813136704
+   "qwen_sharp": 0.5465217813136704,
+   "shots": 151,
+   "auc_ci95": [
+    0.953254127087802,
+    0.9731247117876504
+   ]
   },
   {
    "film": "test film C",
@@ -163,7 +213,12 @@
    "blur_caught_r98": 0.9927601809954751,
    "balacc_r98": 0.8176884118060589,
    "model_sharp_r95": 0.41304843738118774,
-   "qwen_sharp": 0.42941237219869877
+   "qwen_sharp": 0.42941237219869877,
+   "shots": 121,
+   "auc_ci95": [
+    0.9655000076991967,
+    0.9900176825445195
+   ]
   }
  ]
 }

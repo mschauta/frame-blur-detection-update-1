@@ -14,7 +14,7 @@ the expensive error. Out of scope, as observed since: captions, overlaid graphic
 | | original 100-epoch runs | Update 1 |
 |---|---|---|
 | videos | 37 processed files (36 groups) | 173 videos, all 1920 × 1080, H.264, 4:2:0 |
-| frames | the labelled snapshot of those files; 71,562 training frames (13,198 sharp, 58,364 blurred) | 5,010,602 frames from the dataset-builder pipeline; 1,019,201 of them labelled by the VLM teacher; 589,663 training frames (Section 5) |
+| frames | the labelled snapshot of those files; 71,562 training frames (13,198 sharp, 58,364 blurred) | 5,010,602 frames from the dataset-builder pipeline; 1,019,201 of them labelled by the VLM teacher (1,014,161 when the corpus checks were computed: the last 5,040 labels were written later the same day, none of them in the held-out films); 589,663 training frames (Section 5) |
 | photos | 48,797 originals (33,484 train / 7,656 validation / 7,657 test) | unchanged |
 
 ## 4. Labelling
@@ -25,7 +25,8 @@ Unchanged teacher and questions (the frozen VLM with three yes / no questions, c
 ## 5. Frame selection (v8 rules)
 
 - **Films as units.** Two releases of the same film (32 films, found by matching shot cut times) form one film; both
-  releases give all their frames, so the same picture is seen at two bitrates, and both always share a split.
+  releases give all their frames, so the same picture is seen at two bitrates, and both always share a split. For one
+  of the 32 the second release is not among the 173 videos, so the two-release check covers 31 films.
 - **Classes.** Sharp = `sss`; blurred = `bbb` + `bsb`. Film-relative sharp: in a film where `sss / (sss + ssb)` is
   below 0.46, `ssb` counts as sharp too — there it measures as sharp as `sss` does in `sss`-dominant films, and without
   it such a film would give almost only blurred frames. `sbb`, `bss` and the rest are left out.
@@ -79,6 +80,10 @@ original weights keep their behaviour bit for bit.
 - **Corpus scoring.** After the checkpoint was fixed, all 5,010,602 frames were scored once. The held-out evaluation
   uses every labelled frame of the six held-out films; the consistency checks (scene consistency, two releases,
   dominant motion) use the whole corpus with the non-learned measurement as a witness.
+- **Uncertainty of the held-out AUCs.** Frames of one shot are not independent, so the 95% intervals in
+  `heldout_films.json` come from a cluster bootstrap over shots (2,000 resamples, shots drawn with replacement within
+  each film). They are conditional on the six films; three films per group cannot estimate the film-to-film variance,
+  so the per-film range is reported beside them.
 - **Photo ladder.** 300 unseen photos (validation and test split, no 4K frames), uniform linear camera motion of
   L = 0 … 30 px with one fixed direction per photo, through H.264 CRF 23.
 - **Cell map checks.** 3,981 unseen photos without added blur, through H.264 CRF 23 and uncoded; 2,000 held-out frames

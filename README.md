@@ -191,6 +191,21 @@ pip install -r requirements.txt
 python classify.py --weights weights/round3_base_p99_ep029.pt --input frames --output sorted --recall 95
 ```
 
+`classify.py` reports whether the weight file is the published release asset (by its sha256), writes `results.csv` as
+it goes, continues an interrupted run with `--resume` (also after `--move`), and with `--dry-run` only scores, into
+`results_dry_run.csv`.
+
+Tests (no private data needed; the weight-file test runs when `weights/round3_base_p99_ep029.pt` is present):
+
+```
+pip install pytest
+python -m pytest
+```
+
+They cover the fingerprint in both precisions, the model input and its validity channel, output shapes and cell
+validity, loading of old and new weight files, the evidence files (strict JSON, and the numbers quoted here), and
+`classify.py`. One test is an expected failure: the validity-mask leak described under Limitations.
+
 The model expects what it was trained on: **video frames decoded from H.264** (1080p in training), stored losslessly.
 Uncoded images are outside its training distribution (see the cell map below).
 
@@ -219,8 +234,10 @@ the caught share on all labelled frames is close to, but not exactly, 90 / 95 / 
 | test (3) | 33,877 | 25,791 | 0.966 | 81.0% / 95.3% | 69.8% / 97.0% |
 | all six | 71,010 | 43,677 | 0.963 | 80.4% / 95.0% | 67.9% / 97.3% |
 
-Per film the AUC is 0.954–0.980. These numbers are **not directly comparable** with the original 100-epoch runs: the
-frame material, the selection and the split are different.
+Per film the AUC is 0.954–0.980. The 95% intervals, from a bootstrap over shots (frames of one shot are not
+independent), are 0.951–0.965 (validation), 0.955–0.975 (test) and 0.954–0.969 (all six). They hold for these six films;
+three films per group cannot measure how much another film would differ. These numbers are **not directly comparable**
+with the original 100-epoch runs: the frame material, the selection and the split are different.
 
 ### Consistency over the whole corpus
 
@@ -267,6 +284,11 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
   shallow depth of field (an out-of-focus partner in a dialogue) is often called blurred, and motion seen through a car
   window is real blur that a film may accept. The training material comes from handheld-camera, people-centred videos.
 - **Uncoded images** are outside the training distribution.
+- **Validity masks leak at their border.** With a mask, the fingerprint of a valid pixel next to the mask is still
+  computed from the masked neighbours, and those pixels enter the per-image p99 scale. On a 1080p frame with a 160 px
+  masked strip, white content under the mask moves the scale by +14% (black: +8%), i.e. every valid value by about
+  −6% (−4%). The published weights were trained with this behaviour (masks on half of the samples), so it is
+  documented and tested (`tests/test_model.py`, expected failure) rather than changed; `classify.py` uses no mask.
 
 ## Data availability
 

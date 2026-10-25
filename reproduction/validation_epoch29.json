@@ -1,5 +1,6 @@
 {
  "split": "validation: 3 films, frames selected by the v8 rules, 1:1 per film; photos: 2,000 sharp (0-3 px) and 2,000 blurred (16-30 px) variants of the validation photos at fixed grid points",
+ "null": "a measure that is not defined for the group: an AUC or a recall needs frames of both classes, and a per-code group holds one class only",
  "frames": {
   "n": 32380,
   "n_blurred": 16190,
@@ -20,34 +21,34 @@
   "bbb": {
    "n": 9449,
    "n_blurred": 9449,
-   "auc": NaN,
+   "auc": null,
    "balanced_acc": 0.9558683458567044,
-   "recall_sharp": NaN,
+   "recall_sharp": null,
    "recall_blurred": 0.9558683458567044
   },
   "bsb": {
    "n": 6741,
    "n_blurred": 6741,
-   "auc": NaN,
+   "auc": null,
    "balanced_acc": 0.7559709241952233,
-   "recall_sharp": NaN,
+   "recall_sharp": null,
    "recall_blurred": 0.7559709241952233
   },
   "ssb": {
    "n": 2457,
    "n_blurred": 0,
-   "auc": NaN,
+   "auc": null,
    "balanced_acc": 0.8111518111518111,
    "recall_sharp": 0.8111518111518111,
-   "recall_blurred": NaN
+   "recall_blurred": null
   },
   "sss": {
    "n": 13733,
    "n_blurred": 0,
-   "auc": NaN,
+   "auc": null,
    "balanced_acc": 0.9308235636787301,
    "recall_sharp": 0.9308235636787301,
-   "recall_blurred": NaN
+   "recall_blurred": null
   }
  },
  "thresholds": {
