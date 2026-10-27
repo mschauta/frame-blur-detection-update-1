@@ -68,8 +68,10 @@ dedicated model that could learn from the retained labels without running Qwen o
 
 ### 4. ConvNeXt and the signed edge fingerprint
 
-The detector experiments used pretrained ConvNeXt backbones. A DINOv3-pretrained ConvNeXt-Small was tested, but
-under the tested training recipe the **ImageNet-pretrained ConvNeXt** was preferred.
+The detector experiments used pretrained ConvNeXt backbones: the original ConvNeXt architecture (Liu et al., 2022,
+as implemented in torchvision), not ConvNeXt V2. A ConvNeXt-Small with Meta's self-supervised DINOv3 weights was
+tested, but under the tested training recipe torchvision's supervised **ImageNet-1K weights** were preferred; every
+published model starts from them.
 
 The original research direction was the **signed edge fingerprint** inherited from
 [RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling). The earlier `m09` mesh reconstruction
@@ -169,6 +171,7 @@ its implementation, benchmarks and evaluation will belong to the separate Update
 | photo anchors | 33,484 training photos, 0–3 px sharp / 16–30 px blurred, through H.264 | **unchanged** |
 | fingerprint | computed inside bf16 autocast (bf16-rounded) | computed in float32, outside autocast |
 | model | ConvNeXt-Small (~34 M parameters) to stride 16 | ConvNeXt-Base (60.2 M parameters) to stride 16; the same head and pooling |
+| initial weights | torchvision ImageNet-1K, `ConvNeXt_Small_Weights.IMAGENET1K_V1` | torchvision ImageNet-1K, `ConvNeXt_Base_Weights.IMAGENET1K_V1`; both the original ConvNeXt architecture, not ConvNeXt V2 |
 | training | 100 epochs × 12,000 samples (1.2 M) | 30 epochs × 48,000 samples (1.44 M), 90,440 optimizer steps |
 | result | the last epoch | the last epoch |
 

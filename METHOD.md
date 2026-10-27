@@ -64,7 +64,7 @@ original weights keep their behaviour bit for bit.
 
 | | Update 1 |
 |---|---|
-| trunk | ConvNeXt-Base, ImageNet-pretrained, to stride 16 (60.2 M parameters with the head) |
+| trunk | ConvNeXt-Base (the original ConvNeXt architecture of Liu et al., 2022, as implemented in torchvision; not ConvNeXt V2) to stride 16 (60.2 M parameters with the head), initialised from torchvision's supervised ImageNet-1K weights `ConvNeXt_Base_Weights.IMAGENET1K_V1` (`convnext_base-6075fbad.pth`); the `V1` is torchvision's weight-version tag, not the architecture version |
 | head and pooling | as before: one logit per 16 px cell, masked log-sum-exp pooling with a learnable sharpness r (4.0 at the start, 0.86 at the end) |
 | loss | image-level binary cross-entropy; on photos also the dense cell term (weight 0.5), every textured cell carrying the photo label |
 | strata per epoch | 12,000 each: sharp frames, blurred frames, sharp photos, blurred photos (48,000 samples; the original runs: 3,000 each, 12,000 samples) |
