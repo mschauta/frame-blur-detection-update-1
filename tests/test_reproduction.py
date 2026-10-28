@@ -25,6 +25,12 @@ def test_readme_quotes_the_evidence():
     heldout = strict(ROOT / "reproduction" / "heldout_films.json")
     corpus = strict(ROOT / "reproduction" / "corpus_checks.json")
     assert f"| frames | {validation['frames']['auc']:.3f} |" in readme
+    small = strict(ROOT / "reproduction" / "validation_small_epoch29.json")
+    kept = " / ".join(f"{100 * small['frames_at_thresholds'][f'sharp_kept_r{r}']:.1f}" for r in (90, 95, 98))
+    assert f"| frames, ConvNeXt-Small | {small['frames']['auc']:.3f} | {kept}% |" in readme
+    assert small["photos"]["auc"] == validation["photos"]["auc"] == 1.0
+    th = " / ".join(f"{small['thresholds'][f'r{r}']:.4f}" for r in (90, 95, 98))
+    assert f"| 29 (last of 30) | {th} | {small['frames']['auc']:.3f} |" in readme
     groups = {g["group"]: g for g in heldout["groups"]}
     for name, row in (("validation films (3)", "validation (3)"), ("test films (3)", "test (3)"),
                       ("validation + test (6 films)", "all six")):

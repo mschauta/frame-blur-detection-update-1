@@ -7,7 +7,8 @@ sharp / blurred classifier for video frames, on the same input as before — the
 [RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling) `m09` reconstruction — and with the same
 synthetic photo anchors. What changed is the scale and the model: a **much larger frame set (173 videos instead of 37
 files)**, a **ConvNeXt-Base** trunk instead of ConvNeXt-Small, and an **exact float32 fingerprint** instead of the
-bf16-rounded one.
+bf16-rounded one. A **ConvNeXt-Small trained with the same recipe** is published beside it, for the comparison of the
+two trunks ([below](#convnext-small-with-the-same-recipe)).
 
 The task, the principles, the labelling, the photo construction and the model design are described in the original
 repository's [README](https://github.com/mschauta/frame-blur-detection#readme) and
@@ -147,6 +148,29 @@ and about **26 hours** with cell maps. These are **not controlled benchmarks**: 
 utilisation and the earlier measurement/import costs still need separate reproducible profiling. Training time,
 inference time and video preparation must not be conflated.
 
+### ConvNeXt-Small with the same recipe
+
+To see whether the larger trunk is needed, the same training was repeated on ConvNeXt-Small
+(`round3_small_p99_ep029.pt`):
+
+- **The same:** the data, the frame selection and split, the photo pool, the sampling (30 epochs × 48,000 samples),
+  the optimiser settings, the seed and the float32 fingerprint. The trunk starts from torchvision's ImageNet-1K
+  weights (`ConvNeXt_Small_Weights.IMAGENET1K_V1`). As for the Base, the last epoch (29) is the published one.
+- **One other change: the validity mask no longer leaks** (see Limitations). Masked pixels first take the colour of
+  the nearest valid pixel, and the p99 scale counts only valid pixels whose 3 × 3 neighbourhood holds no masked
+  pixel. Without a mask the input is bit-identical to the Base's. The two models therefore differ in the trunk and, on
+  masked samples, in the input: this is not a pure trunk comparison.
+- **Not changed:** the training photos are still coded as single frames, so the frame-type caveat under Limitations
+  applies to this model too.
+- **Size:** 34.0 M parameters to stride 16 against 60.2 M, a 130 MB weight file against 230 MB. Training took
+  22.6 hours against 28.5 hours on the same machine (wall clock with the per-epoch evaluation; a CPU evaluation job ran
+  beside part of the Small run). This is not an inference benchmark.
+- **Validation:** frame AUC 0.961 against 0.962 (see Results). In each of the last five epochs the Small is below the
+  Base, by 0.0007–0.0014.
+
+The held-out, photo-ladder and frame-type evaluations of the Small have not been run yet. The Results below the
+validation table are the Base's.
+
 ### Update 2 — published separately
 
 Update 2 is published in its own repository:
@@ -188,20 +212,23 @@ of both models (see Limitations below).
 
 ## Weights
 
-The weight file is attached to the [release](../../releases) (230 MB; not stored in the repository):
+The weight files are attached to the [releases](../../releases) (not stored in the repository). Both take the edge
+fingerprint:
 
-| file | sha256 | input | epoch | thresholds r90 / r95 / r98 | validation frame AUC |
+| file | sha256 | trunk | epoch | thresholds r90 / r95 / r98 | validation frame AUC |
 |---|---|---|---|---|---|
-| `round3_base_p99_ep029.pt` | `9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6` | edge fingerprint | 29 (last of 30) | 0.2324 / 0.0549 / 0.0164 | 0.962 |
+| `round3_base_p99_ep029.pt` (230 MB) | `9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6` | ConvNeXt-Base | 29 (last of 30) | 0.2324 / 0.0549 / 0.0164 | 0.962 |
+| `round3_small_p99_ep029.pt` (130 MB) | `b715a163f9c6927464d97b7002967c8361c6a0de2b87e3103dc72a7ba733d48b` | ConvNeXt-Small, leak-free mask | 29 (last of 30) | 0.2040 / 0.0407 / 0.0112 | 0.961 |
 
 A frame is called blurred when its score (the sigmoid output, not a calibrated probability) reaches the threshold; the
-three thresholds catch 90 / 95 / 98% of the blurred validation frames. The file holds the state dict and its metadata;
-the metadata keys `arch` and `fingerprint` tell the included loader to build ConvNeXt-Base with the float32
-fingerprint. The weights of the original repository load unchanged with this code.
+three thresholds of each file catch 90 / 95 / 98% of the blurred validation frames for that model. A file holds the
+state dict and its metadata. The metadata keys `arch`, `fingerprint` and `mask` tell the included loader which trunk
+to build, to compute the fingerprint in float32 and, for the Small, to use the leak-free mask (scipy, needed only when
+a mask is given). The weights of the original repository load unchanged with this code.
 
 ```
 pip install -r requirements.txt
-# put round3_base_p99_ep029.pt into weights/
+# put round3_base_p99_ep029.pt (or round3_small_p99_ep029.pt) into weights/
 python classify.py --weights weights/round3_base_p99_ep029.pt --input frames --output sorted --recall 95
 ```
 
@@ -210,7 +237,7 @@ it goes, continues an interrupted run with `--resume` (also after `--move`, and 
 `run.json`: the weight file, the threshold, the input folder, copy or move), and with `--dry-run` only scores, into
 `results_dry_run.csv`, and never copies or moves.
 
-Tests (no private data needed; the weight-file test runs when `weights/round3_base_p99_ep029.pt` is present):
+Tests (no private data needed; the weight-file test runs for each published file present in `weights/`):
 
 ```
 pip install pytest
@@ -219,7 +246,8 @@ python -m pytest
 
 They cover the fingerprint in both precisions, the model input and its validity channel, output shapes and cell
 validity, loading of old and new weight files, the evidence files (strict JSON, and the numbers quoted here), and
-`classify.py`. One test is an expected failure: the validity-mask leak described under Limitations.
+`classify.py`. One test is an expected failure: the validity-mask leak of the Base's input, described under
+Limitations. The leak-free input of the Small passes the same check.
 
 The model expects what it was trained on: **video frames decoded from H.264** (1080p in training), stored losslessly.
 Uncoded images are outside its training distribution (see the cell map below).
@@ -229,12 +257,16 @@ Uncoded images are outside its training distribution (see the cell map below).
 ### Validation (selected frames, 3 films)
 
 16,190 sharp and 16,190 blurred frames selected by the v8 rules, and 4,000 photo variants
-([validation_epoch29.json](reproduction/validation_epoch29.json)):
+([validation_epoch29.json](reproduction/validation_epoch29.json); the Small:
+[validation_small_epoch29.json](reproduction/validation_small_epoch29.json)):
 
 | | AUC | sharp frames kept at 90 / 95 / 98% blurred caught |
 |---|---|---|
 | frames | 0.962 | 88.5 / 79.5 / 66.5% |
-| photos (0–3 px vs 16–30 px) | 1.000 | — |
+| frames, ConvNeXt-Small | 0.961 | 87.9 / 77.7 / 64.1% |
+| photos (0–3 px vs 16–30 px), both models | 1.000 | — |
+
+The results from here on are the Base's.
 
 ### Held-out films, every labelled frame
 
@@ -316,9 +348,10 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
   every valid value by about −6% (−4%). With the training's own watermark masks the effect is negligible: on 594
   masked training frames the scale moved by 0.00% (median) and at most 0.45%. The valid pixels next to a mask are
   0.03% of the valid pixels; there the watermark's edge leaks in (about twice the usual residual). The leak does not
-  depend on the label, as the masks were applied to both classes alike. The published weights were trained with this
-  behaviour (masks on half of the samples), so it is documented and tested (`tests/test_model.py`, expected failure)
-  rather than changed; `classify.py` uses no mask.
+  depend on the label, as the masks were applied to both classes alike. The Base was trained with this behaviour
+  (masks on half of the samples), so for it the leak is kept, documented and tested (`tests/test_model.py`, expected
+  failure). The Small was trained without the leak (`mask: leak-free`), and the loader removes it for that file.
+  `classify.py` passes no mask, so its results are unaffected either way.
 
 ## Data availability
 

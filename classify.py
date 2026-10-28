@@ -44,7 +44,8 @@ from blurdetect import load_detector
 EXTS = {".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff", ".webp"}
 FIELDS = ["file", "blur_score", "decision"]
 # The release assets of this repository (README.md, "Weights").
-PUBLISHED_SHA256 = {"9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6": "round3_base_p99_ep029.pt"}
+PUBLISHED_SHA256 = {"9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6": "round3_base_p99_ep029.pt",
+                    "b715a163f9c6927464d97b7002967c8361c6a0de2b87e3103dc72a7ba733d48b": "round3_small_p99_ep029.pt"}
 
 
 def sha256(path: Path) -> str:

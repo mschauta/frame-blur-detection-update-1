@@ -6,11 +6,17 @@ import numpy as np
 import pytest
 import torch
 
-from blurdetect.model import BlurDetector, CELL, KERNEL, SCALE_FLOOR, fingerprint, load_detector, model_input
+from blurdetect.model import (BlurDetector, CELL, KERNEL, SCALE_FLOOR, fingerprint, load_detector, model_input,
+                               nearest_fill)
 
 ROOT = Path(__file__).resolve().parents[1]
-WEIGHTS = ROOT / "weights" / "round3_base_p99_ep029.pt"
-WEIGHTS_SHA256 = "9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6"
+# file: sha256, trunk, channels at stride 16, mask handling
+PUBLISHED = {
+    "round3_base_p99_ep029.pt": ("9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6", "convnext_base", 512,
+                                 "leaky"),
+    "round3_small_p99_ep029.pt": ("b715a163f9c6927464d97b7002967c8361c6a0de2b87e3103dc72a7ba733d48b", "convnext_small",
+                                  384, "leak-free"),
+}
 
 
 def textured(h=48, w=64, seed=0):
@@ -85,7 +91,7 @@ def test_old_weight_files_keep_their_meaning(tmp_path, small):
     path = tmp_path / "old.pt"
     torch.save({"state_dict": small.state_dict(), "meta": {"input": "p99"}}, path)    # no arch / fingerprint keys
     model, meta = load_detector(path)
-    assert not model.exact and model.head[0].in_channels == 384                       # ConvNeXt-Small, bf16-rounded
+    assert not model.exact and not model.leak_free and model.head[0].in_channels == 384   # Small, bf16, leaky mask
     x = textured(32, 48)
     with torch.no_grad():
         assert torch.equal(model(x)["local"], small(x)["local"])
@@ -107,14 +113,49 @@ def test_masked_content_does_not_reach_the_valid_region():
     assert torch.allclose(a * mask, b * mask, atol=1e-5)
 
 
-@pytest.mark.skipif(not WEIGHTS.is_file(), reason="the published weight file is a release asset; put it into weights/")
-def test_published_weight_file():
-    digest = hashlib.sha256(WEIGHTS.read_bytes()).hexdigest()
-    assert digest == WEIGHTS_SHA256
-    model, meta = load_detector(WEIGHTS)
-    assert (meta["arch"], meta["fingerprint"], meta["input"], meta["epoch"]) == ("convnext_base", "fp32", "p99", 29)
+def test_leak_free_masked_content_does_not_reach_the_valid_region():
+    x = textured(32, 32)
+    mask = torch.ones((1, 1, 32, 32))
+    mask[..., 8:20, :16] = 0
+    x2 = x.clone()
+    x2[..., 8:20, :16] = textured(32, 32, seed=1)[..., 8:20, :16]
+    a = model_input(x, mask, "p99", exact=True, leak_free=True)
+    b = model_input(x2, mask, "p99", exact=True, leak_free=True)
+    assert torch.equal(a, b)
+    assert not torch.equal(model_input(x, mask, "p99", exact=True), model_input(x2, mask, "p99", exact=True))
+
+
+def test_leak_free_without_a_mask_is_the_leaky_input():
+    x = textured()
+    assert torch.equal(model_input(x, None, "p99", exact=True, leak_free=True), model_input(x, None, "p99", exact=True))
+    ones = torch.ones((1, 1, 48, 64))
+    assert torch.equal(model_input(x, ones, "p99", exact=True, leak_free=True), model_input(x, ones, "p99", exact=True))
+
+
+def test_nearest_fill_takes_the_nearest_valid_colour():
+    rgb = np.zeros((5, 7, 3), np.uint8)
+    rgb[:, :2] = 10                                    # valid, left
+    rgb[:, 5:] = 200                                   # valid, right
+    rgb[:, 2:5] = 99                                   # masked
+    valid = np.ones((5, 7), np.uint8)
+    valid[:, 2:5] = 0
+    out = nearest_fill(rgb, valid)
+    assert (out[:, 2] == 10).all() and (out[:, 4] == 200).all() and (out[:, 3] != 99).all()
+    assert np.array_equal(out[valid == 1], rgb[valid == 1])
+
+
+@pytest.mark.parametrize("name", PUBLISHED)
+def test_published_weight_file(name):
+    path = ROOT / "weights" / name
+    if not path.is_file():
+        pytest.skip(f"{name} is a release asset; put it into weights/")
+    sha, arch, width, mask = PUBLISHED[name]
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == sha
+    model, meta = load_detector(path)
+    assert (meta["arch"], meta["fingerprint"], meta["input"], meta["epoch"]) == (arch, "fp32", "p99", 29)
+    assert meta.get("mask", "leaky") == mask
     assert set(meta["thresholds"]) == {"r90", "r95", "r98"}
-    assert model.exact and model.head[0].in_channels == 512
+    assert model.exact and model.leak_free == (mask == "leak-free") and model.head[0].in_channels == width
     with torch.no_grad():
         out = model(textured(64, 96))
     assert out["local"].shape == (1, 1, 4, 6) and torch.isfinite(out["image"]).all()

@@ -5,6 +5,7 @@ Aggregate numbers behind the README; no images, frames or per-frame records of t
 | file | what |
 |---|---|
 | `validation_epoch29.json` | the validation report of the published checkpoint: frames, photos, per VLM code, thresholds and the shares kept / caught at them; `null` where a measure is not defined (a per-code group holds one class only) |
+| `validation_small_epoch29.json` | the same report for the ConvNeXt-Small trained with the same recipe (`round3_small_p99_ep029.pt`) |
 | `heldout_films.json` | every labelled frame of the six held-out films, scored once after the checkpoint was fixed: per group and per film (film names withheld), with 95% AUC intervals from a bootstrap over shots |
 | `corpus_checks.json` | whole-corpus checks: scene consistency, the two releases of the same films, catch rates by dominant motion, agreement with the non-learned motion measurement, cell maps on unblurred photos |
 | `photo_ladder_epoch29.json` | the photo ladder: share called blurred and median logit per added blur length |

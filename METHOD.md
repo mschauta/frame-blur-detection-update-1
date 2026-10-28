@@ -65,6 +65,12 @@ computed its 3 × 3 convolution inside bf16 autocast, so their fingerprint was b
 that input. The loader reads the precision from the weight file (`fingerprint`: `fp32` or `bf16-rounded`); the
 original weights keep their behaviour bit for bit.
 
+The ConvNeXt-Small trained with the same recipe (`round3_small_p99_ep029.pt`) has a **leak-free validity mask**.
+Before the fingerprint, the masked pixels take the colour of the nearest valid pixel (exact Euclidean distance, the
+way the image border is replicated), and the p99 scale counts only valid pixels whose 3 × 3 neighbourhood holds no
+masked pixel. Without a mask the input is bit-identical to the Base's. Its weight file says `mask`: `leak-free`; files
+without the key keep the leaky input of the Base (README, Limitations).
+
 ## 8. Model, loss and sampling
 
 | | Update 1 |
@@ -77,6 +83,7 @@ original weights keep their behaviour bit for bit.
 | length | 30 epochs, 90,440 optimizer steps; each sharp training frame seen about once, each blurred about 1.5 times |
 | sampling | resume-exact: a chain of permutations per stratum keyed by seed, stratum and pass, so every sample comes once before any comes twice; the last smaller batch of a size bucket is trained too |
 | checkpoint | the last epoch (29), as in the original runs; fixed before the corpus evaluation |
+| ConvNeXt-Small beside it | trunk ConvNeXt-Small to stride 16 (34.0 M parameters with the head) from `ConvNeXt_Small_Weights.IMAGENET1K_V1` (`convnext_small-0c510722.pth`), and the leak-free mask (Section 7); everything else in this table the same, including the seed; r 4.0 at the start, 0.84 at the end; the last epoch (29) |
 
 ## 9. Evaluation
 
@@ -97,7 +104,8 @@ original weights keep their behaviour bit for bit.
 ## 10. Training environment
 
 NVIDIA GeForce RTX 5090 (32 GB), Windows 11, Python 3.13, PyTorch 2.14 with CUDA 13.0, FFmpeg 7.1.1 (x264). Training
-took 28.5 hours including the per-epoch evaluation, without interruption.
+took 28.5 hours including the per-epoch evaluation, without interruption. The ConvNeXt-Small took 22.6 hours on the
+same machine, also without interruption; a CPU evaluation job ran beside part of it.
 
 ## 12. Data availability
 
