@@ -53,6 +53,11 @@ Unchanged: the same pool, the same split, blur in linear light, H.264 CRF 20 / 2
 (length, direction, CRF) per class walked differently for every photo and epoch; sharp 0–3 px, blurred 16–30 px. As
 before, half of the photo samples and half of the frame samples carry a watermark validity mask.
 
+Each photo goes through x264 as a single frame, so every photo anchor is an intra-coded I-frame, while most video
+frames are P- or B-frames. A later experiment in the
+[Update 2 repository](https://github.com/mschauta/frame-blur-detection-update-2/tree/main/experiments/r4k1_codec_frametype)
+shows that the coded frame type changes this model's scores (README, Limitations).
+
 ## 7. Model input
 
 The same p99-normalised signed `m09` fingerprint, but computed in **float32 outside autocast**. The original runs

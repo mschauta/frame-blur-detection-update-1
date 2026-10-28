@@ -15,6 +15,9 @@ repository's [README](https://github.com/mschauta/frame-blur-detection#readme) a
 Update 1: [METHOD.md](METHOD.md) lists the changes section by section, and [reproduction/](reproduction/) holds
 the aggregate evidence behind the reported results.
 
+The next model, [Update 2](https://github.com/mschauta/frame-blur-detection-update-2), is published separately. It was
+trained on this model's cell maps.
+
 ## Development history
 
 Frame Blur Detection grew out of an attempt to **measure sharpness in video**, not out of an initial plan to train a
@@ -144,21 +147,28 @@ and about **26 hours** with cell maps. These are **not controlled benchmarks**: 
 utilisation and the earlier measurement/import costs still need separate reproducible profiling. Training time,
 inference time and video preparation must not be conflated.
 
-### Next research direction — Update 2 (training in progress)
+### Update 2 — published separately
 
-A **separate future repository** is planned for Update 2; it is **not a completed result of this release**.
-The experiment currently being trained, `v9_base_selfmap_v2`, keeps the **signed edge fingerprint** and
-ConvNeXt-Base architecture but proposes a different learning target: rather than primarily reproducing binary
-sharp/blurred labels, it uses the preceding model's **continuous cell-level predictions as soft targets** across
-approximately **4.85 million training frames**, with controlled synthetic photographs retained.
+Update 2 is published in its own repository:
+[Frame Blur Detection — Update 2](https://github.com/mschauta/frame-blur-detection-update-2). Its training run,
+`v9_base_selfmap_v2`, finished on 27 October 2026.
 
-The intended outputs are a **continuous frame-level blur measure** (weighted blur mass, `M`) and a
-**spatial cell map**, with fast inference on the fingerprint representation. This is a form of spatial
-self-distillation: the earlier model supplies training targets, rather than directly donating its trained
-weights. Teacher-generated targets may also propagate errors and are **not independent ground truth**.
+- **What it keeps:** the signed edge fingerprint and the ConvNeXt-Base architecture.
+- **What it learns from:** this model's **cell maps as soft per-cell targets** on all 4.85 million frames of the
+  training videos, with the synthetic photographs retained. The blurred photos now start at 10 px.
+- **What it gives:** a **continuous frame-level blur mass M**, a fixed readout of its cell map, instead of a
+  thresholded score.
 
-**Training is still underway.** No Update 2 accuracy, speedup or final training outcome is claimed here;
-its implementation, benchmarks and evaluation will belong to the separate Update 2 publication.
+This is a form of spatial self-distillation. The earlier model supplies training targets; its trained weights are
+not reused. Teacher-generated targets propagate the teacher's errors and are **not independent ground truth**, so
+Update 2 is evaluated against signals this model did not produce:
+
+- the motion measurement: Spearman 0.685, against 0.691 for this model;
+- the same photo ladder: it flips at about 6.9 px instead of 9 px.
+
+Its evaluation against the VLM labels of the six held-out films is still to come. The Update 2 repository also holds
+a two-video experiment on how the coded frame type (I, P or B) changes the scores of both models (see Limitations
+below).
 
 ## What changed
 
@@ -264,8 +274,9 @@ All 5,010,602 frames of the 173 videos were scored ([corpus_checks.json](reprodu
 The decision flips at about **9 px** at all three thresholds (98%: 8 px 8%, 10 px 86%, 12 px 100%): the logit jumps
 from −14 to +8 between 8 and 10 px. From 0 to 6 px the logit stays saturated around −22, so **the score does not rank
 inside the sharp range** (pairwise order accuracy 0.62 for 0–3 px, 0.99 for 3–16 px). This follows from the training
-construction: 0–3 px are taught as sharp, 16–30 px as blurred, and the 4–15 px gap is never trained. A later model will
-use a different photo ladder; this one belongs to Update 1.
+construction: 0–3 px are taught as sharp, 16–30 px as blurred, and the 4–15 px gap is never trained. Update 2 trains
+its blurred photos from 10 px. On this same ladder it flips at about 6.9 px, and its photo-ladder results are in
+[its repository](https://github.com/mschauta/frame-blur-detection-update-2#photo-ladder).
 
 ### Cell map
 
@@ -287,6 +298,16 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
   shallow depth of field (an out-of-focus partner in a dialogue) is often called blurred, and motion seen through a car
   window is real blur that a film may accept. The training material comes from handheld-camera, people-centred videos.
 - **Uncoded images** are outside the training distribution.
+- **The coded frame type changes the score.** This was found after this release, in Update 2's
+  [two-video experiment](https://github.com/mschauta/frame-blur-detection-update-2/tree/main/experiments/r4k1_codec_frametype).
+  - Inside a shot, this model scores the intra-coded I-frame sharper than its P/B neighbours, although they show the
+    same picture: in 93.4% of the comparisons at shot starts on a 2.6 Mbit/s film encode, and in 68.1% on a
+    5.7 Mbit/s web release.
+  - Picking the sharpest frame of each 20 s window, the pick is an I-frame 76× and 32× more often than the I-frame
+    share predicts.
+  - Every training photo was coded as a single frame, so all sharp photo anchors were I-frames.
+  - Do not rank frames of different coded types against each other without a correction, and split evaluations on
+    film material by frame type.
 - **Validity masks leak at their border.** With a mask, the fingerprint of a valid pixel next to the mask is still
   computed from the masked neighbours, and those pixels enter the per-image p99 scale. In an artificial worst case, a
   1080p frame with a 160 px masked strip, white content under the mask moves the scale by +14% (black: +8%), i.e.
@@ -307,6 +328,8 @@ selection rules, the reported aggregate metrics, the inference code and the trai
 
 - [Frame Blur Detection](https://github.com/mschauta/frame-blur-detection): the method, the RGB / grayscale / edge
   fingerprint comparison, the first published weights and the evidence package.
+- [Frame Blur Detection — Update 2](https://github.com/mschauta/frame-blur-detection-update-2): the next model,
+  trained on this model's cell maps, with a continuous blur mass, and the two-video experiment on the coded frame type.
 - [RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling): the continuous RGB-mesh reconstruction from
   which the edge fingerprint is derived.
 
