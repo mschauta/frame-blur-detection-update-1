@@ -205,8 +205,9 @@ python classify.py --weights weights/round3_base_p99_ep029.pt --input frames --o
 ```
 
 `classify.py` reports whether the weight file is the published release asset (by its sha256), writes `results.csv` as
-it goes, continues an interrupted run with `--resume` (also after `--move`), and with `--dry-run` only scores, into
-`results_dry_run.csv`.
+it goes, continues an interrupted run with `--resume` (also after `--move`, and only with the settings recorded in
+`run.json`: the weight file, the threshold, the input folder, copy or move), and with `--dry-run` only scores, into
+`results_dry_run.csv`, and never copies or moves.
 
 Tests (no private data needed; the weight-file test runs when `weights/round3_base_p99_ep029.pt` is present):
 

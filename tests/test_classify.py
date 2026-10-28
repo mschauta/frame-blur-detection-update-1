@@ -31,9 +31,9 @@ def setup(tmp_path, monkeypatch):
         Image.fromarray(np.full((16, 16, 3), grey, np.uint8)).save(frames / f"f{i}.png")
     weights = tmp_path / "w.pt"
     weights.write_bytes(b"stand-in")
-    state = {"model": FakeModel()}
+    state = {"model": FakeModel(), "thresholds": {"r90": 0.5, "r95": 0.5, "r98": 0.5}}
     monkeypatch.setattr(classify, "load_detector", lambda path, device: (
-        state["model"], {"thresholds": {"r90": 0.5, "r95": 0.5, "r98": 0.5}, "input_description": "test", "epoch": 0}))
+        state["model"], {"thresholds": state["thresholds"], "input_description": "test", "epoch": 0}))
     args = ["--weights", str(weights), "--input", str(frames), "--output", str(tmp_path / "out"), "--device", "cpu"]
     return {"frames": frames, "out": tmp_path / "out", "args": args, "state": state}
 
@@ -75,3 +75,40 @@ def test_interrupted_move_run_resumes_without_losses_or_duplicates(setup):
     assert sorted(names) == [f"f{i}.png" for i in range(5)] and len(names) == 5
     assert not list(setup["frames"].iterdir())
     assert sorted(p.name for p in (setup["out"] / "sharp").iterdir()) == ["f0.png", "f2.png", "f4.png"]
+
+
+def test_dry_run_with_resume_leaves_the_output_folders_alone(setup):
+    """An image in <output>/sharp without a row (left by a real run) is neither moved nor scored by a dry run."""
+    for label in ("sharp", "blur"):
+        (setup["out"] / label).mkdir(parents=True)
+    orphan = setup["out"] / "sharp" / "orphan.png"
+    Image.fromarray(np.full((16, 16, 3), 200, np.uint8)).save(orphan)      # score 0.78: blurred
+    classify.main(setup["args"] + ["--dry-run", "--resume"])
+    assert orphan.exists() and not list((setup["out"] / "blur").iterdir())
+    assert set(rows(setup["out"], "results_dry_run.csv")) == {f"f{i}.png" for i in range(5)}
+
+
+def test_resume_refuses_another_threshold_weight_file_input_or_mode(setup, tmp_path):
+    """One results.csv holds one decision rule: a resume with other settings would mix two."""
+    classify.main(setup["args"])
+    setup["state"]["thresholds"] = {"r90": 0.3, "r95": 0.5, "r98": 0.7}
+    other_weights = tmp_path / "w2.pt"
+    other_weights.write_bytes(b"another stand-in")
+    other_input = tmp_path / "frames2"
+    other_input.mkdir()
+    for key, args in [("threshold", setup["args"] + ["--recall", "98"]),
+                      ("weights_sha256", setup["args"][:1] + [str(other_weights)] + setup["args"][2:]),
+                      ("input", setup["args"][:3] + [str(other_input)] + setup["args"][4:]),
+                      ("move", setup["args"] + ["--move"])]:
+        with pytest.raises(SystemExit, match=key):
+            classify.main(args + ["--resume"])
+    classify.main(setup["args"] + ["--resume"])                  # the same settings continue
+    assert len(rows(setup["out"])) == 5
+
+
+def test_resume_refuses_results_without_a_run_record(setup):
+    """A results.csv of an earlier classify.py records no settings, so a resume could not check them."""
+    classify.main(setup["args"])
+    (setup["out"] / "run.json").unlink()
+    with pytest.raises(SystemExit, match="run.json"):
+        classify.main(setup["args"] + ["--resume"])
