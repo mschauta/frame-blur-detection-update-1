@@ -164,11 +164,12 @@ not reused. Teacher-generated targets propagate the teacher's errors and are **n
 Update 2 is evaluated against signals this model did not produce:
 
 - the motion measurement: Spearman 0.685, against 0.691 for this model;
-- the same photo ladder: it flips at about 6.9 px instead of 9 px.
+- the same photo ladder: it flips at about 6.9 px instead of 9 px;
+- the VLM labels of the six held-out films, which this model learned from (on other films) and Update 2 never saw:
+  AUC 0.959 against 0.963 for this model, a paired difference of −0.0041 [−0.0060, −0.0024].
 
-Its evaluation against the VLM labels of the six held-out films is still to come. The Update 2 repository also holds
-a two-video experiment on how the coded frame type (I, P or B) changes the scores of both models (see Limitations
-below).
+The Update 2 repository also holds a two-video experiment on how the coded frame type (I, P or B) changes the scores
+of both models (see Limitations below).
 
 ## What changed
 
