@@ -1,0 +1,35 @@
+{
+ "experiment": "R4S-1",
+ "files": {
+  "analyse.py": "955c39106320fc0e14399f5d50194287f1897b4418fbab8a026c86c3d123e3b8",
+  "data/heldout_frames.csv.gz": "f17e35c3e9755a840a7506cc5043b6ba24c564b28e072777cc68eb80f2e8acfd",
+  "data/ladder_logits.npz": "65a1b94d5d557dd43ea7650d82bf61cc7cbd932ed615d90398e0ea0c202d7b88",
+  "data/results_heldout.json": "7365a1d7a2cd8bc5abf11f8b90dde4d2c6903ceab6e3ac1b097c205180af70e9",
+  "data/results_ladder.json": "414e7d04e120d01d2e3602fe06cbc5512cc1944dda66a177a57e6e057927d806",
+  "data/score_heldout.log": "89fbd5b6dafd5777218ecc32bf8bb13932b048ac0608de4e4c547732f189427f",
+  "data/score_ladder.log": "e30ad1f80282f6b4d7136455fb21f5a7ec3592631ce34f7b415163a029dde2ed",
+  "data/speed.json": "153275f653a27f09179d3fe56113ce022521ed877a3987ee90a9f6c07852e2f8",
+  "data/thresholds.json": "2104280b7c21c6f66caa60110c199434b444e655dde0483be7bab74690ebc313",
+  "PROTOCOL.md": "9988179cb3690f73ba8788e86f187a7b4dbb2514b04d3723436dfb40bf4e2db9",
+  "PROTOCOL.sha256": "901f8ba45426825b875ad3590d294694d95199280541e9812961d524fea4afdd",
+  "PROTOCOL_hu.md": "36ba09ea80184cd53f2f70d2e208ed3c666d8c37a02ad938f24fc5af43491c47",
+  "REPORT.md": "ae261da327e37258ae0a0854544a1b6a3b14919b771a2d2ee91b143e05f3e98d",
+  "score.py": "27468ec1ef3dd00165834a894ab4866e20605e80fcab8a6fa4d7a64e70d1de53"
+ },
+ "publication_edits": {
+  "score.py": "blurtrainer/tools/r4s1_small_base.py as run, with: the docstring rewritten for publication; the heldout-report and ladder-report steps moved to analyse.py (with them the helpers _spearman and _kappa and the --reps option); the etalon albums' bin names replaced by ETALON_ALBUMS = () (withheld); a comment on PROBE",
+  "analyse.py": "the two report steps of the tool as run, changed only to read the published tables (data/heldout_frames.csv.gz, data/ladder_logits.npz, data/thresholds.json) instead of master.db, the v9 frame table and the weight files; the helpers auc, flip, pairs (from eval_v9) and logit (from probe_round3) copied in; the film labels read from the table instead of matched by class counts (the counts are still checked); LF line ends for the result files",
+  "data/heldout_frames.csv.gz": "exported from the scored table and master.db: frame ids, image paths and video ids dropped; the rows in the report's order; the shots numbered per film as in the report",
+  "data/ladder_logits.npz": "r4s1_ladder.npz without the photo ids",
+  "data/thresholds.json": "the two weight files' identity and stored thresholds, from their metadata",
+  "data/speed.json, data/results_*.json, data/*.log": "as written, with LF line ends",
+  "PROTOCOL_hu.md": "the registered text: docs/kiserlet_r4s1_small_base.md up to and including the '## Napló' heading, byte for byte; PROTOCOL.md is its English translation, REPORT.md translates the log"
+ },
+ "check": "from data/heldout_frames.csv.gz, data/ladder_logits.npz and data/thresholds.json, analyse.py reproduces data/results_heldout.json and data/results_ladder.json byte for byte (checked on 2026-10-29 against the files the tool wrote as run, after normalising line ends; Python 3.13.15, numpy 2.5.2, scipy 1.18.1)",
+ "line_ends": "the hashes are of the files with LF line ends, as stored in git; a Windows checkout with core.autocrlf has CRLF in text files, so compare after normalising line ends (tests/test_reproduction.py does)",
+ "weights_sha256": {
+  "round3_base_p99_ep029.pt": "9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6",
+  "round3_small_p99_ep029.pt": "b715a163f9c6927464d97b7002967c8361c6a0de2b87e3103dc72a7ba733d48b"
+ },
+ "loader": "blurdetect of this repository at 62734f4; torch 2.14.0+cu130 on an RTX 5090"
+}

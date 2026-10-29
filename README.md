@@ -13,8 +13,9 @@ two trunks ([below](#convnext-small-with-the-same-recipe)).
 The task, the principles, the labelling, the photo construction and the model design are described in the original
 repository's [README](https://github.com/mschauta/frame-blur-detection#readme) and
 [METHOD.md](https://github.com/mschauta/frame-blur-detection/blob/main/METHOD.md). The development history below explains how the approach evolved. The rest of this repository focuses on
-Update 1: [METHOD.md](METHOD.md) lists the changes section by section, and [reproduction/](reproduction/) holds
-the aggregate evidence behind the reported results.
+Update 1: [METHOD.md](METHOD.md) lists the changes section by section, [reproduction/](reproduction/) holds
+the aggregate evidence behind the reported results, and [experiments/r4s1_small_base/](experiments/r4s1_small_base/)
+holds the comparison of the Small with the Base.
 
 The next model, [Update 2](https://github.com/mschauta/frame-blur-detection-update-2), is published separately. It was
 trained on this model's cell maps.
@@ -168,8 +169,23 @@ To see whether the larger trunk is needed, the same training was repeated on Con
 - **Validation:** frame AUC 0.961 against 0.962 (see Results). In each of the last five epochs the Small is below the
   Base, by 0.0007–0.0014.
 
-The held-out, photo-ladder and frame-type evaluations of the Small have not been run yet. The Results below the
-validation table are the Base's.
+- **Comparison tests (R4S-1).** The protocol was fixed before any result. It is in
+  [experiments/r4s1_small_base/](experiments/r4s1_small_base/), with the code, the per-frame scores and the
+  [report](experiments/r4s1_small_base/REPORT.md). Both models scored the same frames in the same script.
+  - **Held-out films:** on all labelled frames of the six held-out films, the AUC is 0.962 for the Small and 0.963 for
+    the Base. The paired difference is −0.0007 [−0.0018, +0.0004], so no difference is shown.
+  - **Sharp frames kept:** at r95 the Small keeps 79.0% of the sharp frames, the Base 80.4%, with the same 95% of the
+    blurred frames caught.
+  - **Motion measurement:** the Small agrees slightly more with it (Spearman 0.705 against 0.699).
+  - **Photo ladder:** its 50% flip is at 9.04 px against 9.13 px.
+  - **Speed:** at inference the Small is 1.35× faster: 11.5 against 15.4 ms per 1080p frame on an RTX 5090.
+  - The intervals describe the shots of these six films, not other films.
+- **Frame type:** see the controlled test on sharp photos in Update 2's
+  [experiments/r4k2_gop_photo](https://github.com/mschauta/frame-blur-detection-update-2/tree/main/experiments/r4k2_gop_photo).
+  Both models score P/B-frame codings of a sharp photo much blurrier than its I-frame-only coding. There the Small gave
+  more false alarms than the Base (r95: 2.4% against 1.7% of the frames).
+
+The Results below the validation table are the Base's.
 
 ### Update 2 — published separately
 
@@ -192,8 +208,8 @@ Update 2 is evaluated against signals this model did not produce:
 - the VLM labels of the six held-out films, which this model learned from (on other films) and Update 2 never saw:
   AUC 0.959 against 0.963 for this model, a paired difference of −0.0041 [−0.0060, −0.0024].
 
-The Update 2 repository also holds a two-video experiment on how the coded frame type (I, P or B) changes the scores
-of both models (see Limitations below).
+The Update 2 repository also holds a two-video experiment and a controlled photo test on how the coded frame type
+(I, P or B) changes the scores of both models (see Limitations below).
 
 ## What changed
 
@@ -340,6 +356,11 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
   - Picking the sharpest frame of each 20 s window, the pick is an I-frame 76× and 32× more often than the I-frame
     share predicts.
   - Every training photo was coded as a single frame, so all sharp photo anchors were I-frames.
+  - A controlled test on sharp photos confirms it
+    ([R4K-2](https://github.com/mschauta/frame-blur-detection-update-2/tree/main/experiments/r4k2_gop_photo)).
+    Coded I-frame-only, a sharp photo is practically never called blurred. Coded as P/B-frames, the same frame scores
+    8.7–13.7 logits higher at CRF 23 and 2 Mbit/s and in clips with motion, and up to 7.1% of the frames are called
+    blurred at r95.
   - Do not rank frames of different coded types against each other without a correction, and split evaluations on
     film material by frame type.
 - **Validity masks leak at their border.** With a mask, the fingerprint of a valid pixel next to the mask is still
@@ -357,14 +378,16 @@ within-frame Spearman 0.34 over 160 px cells, 2,000 held-out frames). The image 
 
 As in the original repository: the training data is **not published**, it was built from copyrighted videos and
 photographs, and no images, frames, crops or derived images from it are published. Published are the method, the
-selection rules, the reported aggregate metrics, the inference code and the trained weights.
+selection rules, the reported aggregate metrics, the inference code and the trained weights. The R4S-1 experiment
+also publishes per-frame scores of the held-out frames and the ladder photos: numbers only, without frame or photo
+ids, times or film names.
 
 ## Related work by the author
 
 - [Frame Blur Detection](https://github.com/mschauta/frame-blur-detection): the method, the RGB / grayscale / edge
   fingerprint comparison, the first published weights and the evidence package.
 - [Frame Blur Detection — Update 2](https://github.com/mschauta/frame-blur-detection-update-2): the next model,
-  trained on this model's cell maps, with a continuous blur mass, and the two-video experiment on the coded frame type.
+  trained on this model's cell maps, with a continuous blur mass, and the two experiments on the coded frame type.
 - [RGB Mesh Resampling](https://github.com/mschauta/rgb-mesh-resampling): the continuous RGB-mesh reconstruction from
   which the edge fingerprint is derived.
 

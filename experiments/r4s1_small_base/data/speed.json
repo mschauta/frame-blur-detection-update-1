@@ -1,0 +1,40 @@
+{
+ "frame": "1920x1080",
+ "gpu": "NVIDIA GeForce RTX 5090",
+ "torch": "2.14.0+cu130",
+ "path": "classify.py: the published loader, bfloat16 autocast, no mask",
+ "warmup": 30,
+ "iterations": 200,
+ "models": {
+  "base": {
+   "batch_1": {
+    "ms_per_batch": 15.437265625,
+    "ms_per_image": 15.437265625,
+    "images_per_s": 64.7783114116105,
+    "peak_memory_mib": 804.658203125
+   },
+   "batch_8": {
+    "ms_per_batch": 124.58841796875,
+    "ms_per_image": 15.57355224609375,
+    "images_per_s": 64.21142615364622,
+    "peak_memory_mib": 3634.2490234375
+   }
+  },
+  "small": {
+   "batch_1": {
+    "ms_per_batch": 11.46400634765625,
+    "ms_per_image": 11.46400634765625,
+    "images_per_s": 87.22953997704687,
+    "peak_memory_mib": 707.533203125
+   },
+   "batch_8": {
+    "ms_per_batch": 90.9548828125,
+    "ms_per_image": 11.3693603515625,
+    "images_per_s": 87.95569575403327,
+    "peak_memory_mib": 2869.2490234375
+   }
+  }
+ },
+ "small_over_base_batch_1": 1.346585578972229,
+ "small_over_base_batch_8": 1.3697826231669634
+}

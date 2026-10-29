@@ -1,0 +1,457 @@
+{
+ "what": "R4S-1: every VLM-labelled frame of the 6 held-out films, scored once with both published round3 files (ConvNeXt-Base v1.0, ConvNeXt-Small v1.1) in the same script; the Base's corpus scores of the same frames as the control; Update 1's class definitions, film names withheld",
+ "readouts": {
+  "small": "the Small's image logit",
+  "base": "the Base's image logit, rescored here",
+  "base_corpus": "the Base's corpus score (master.db), as published in Update 1",
+  "small_m_inner / base_m_inner": "M read from the cell map: mean of relu(cell logit) over the inner cells"
+ },
+ "auc_ci95": "95% percentile interval from a cluster bootstrap over shots (2000 resamples, shots drawn with replacement within each film); the same resamples for every readout, so the difference is paired",
+ "control_rescored_base_vs_published": [
+  {
+   "film": "test film B",
+   "published_auc": 0.97641315216468,
+   "rescored_base_auc": 0.9764086190496866,
+   "pearson_rescored_vs_corpus_logit": 0.9999990365898055
+  },
+  {
+   "film": "test film C",
+   "published_auc": 0.9804125721772781,
+   "rescored_base_auc": 0.9804135080605669,
+   "pearson_rescored_vs_corpus_logit": 0.999999824168888
+  },
+  {
+   "film": "test film A",
+   "published_auc": 0.9541684278824643,
+   "rescored_base_auc": 0.9541897391457209,
+   "pearson_rescored_vs_corpus_logit": 0.9999994619911741
+  },
+  {
+   "film": "validation film A",
+   "published_auc": 0.9585665176383867,
+   "rescored_base_auc": 0.9585639307358199,
+   "pearson_rescored_vs_corpus_logit": 0.9999995175452958
+  },
+  {
+   "film": "validation film B",
+   "published_auc": 0.9535766613117422,
+   "rescored_base_auc": 0.9535829179131583,
+   "pearson_rescored_vs_corpus_logit": 0.9999990379944327
+  },
+  {
+   "film": "validation film C",
+   "published_auc": 0.9645042649750033,
+   "rescored_base_auc": 0.9645045118544283,
+   "pearson_rescored_vs_corpus_logit": 0.9999997207503086
+  }
+ ],
+ "groups": [
+  {
+   "group": "validation films (3)",
+   "n_sharp": 37133,
+   "n_blur": 17886,
+   "auc": {
+    "small": 0.9577535682704617,
+    "base": 0.9584161653024174,
+    "base_corpus": 0.9584151098351873,
+    "small_m_inner": 0.957359977614338,
+    "base_m_inner": 0.9571206891906505
+   },
+   "auc_ci95": {
+    "small": [
+     0.9497745621907775,
+     0.9649155625602015
+    ],
+    "base": [
+     0.9512759321878111,
+     0.965098132134779
+    ],
+    "base_corpus": [
+     0.9512749437484194,
+     0.9650931467863075
+    ],
+    "small_m_inner": [
+     0.9495475443963586,
+     0.9642843548840726
+    ],
+    "base_m_inner": [
+     0.9496237382514586,
+     0.9641384294825702
+    ]
+   },
+   "auc_difference_small_minus_base": {
+    "value": -0.0006625970319557029,
+    "ci95": [
+     -0.002198316602684397,
+     0.0007491755607961808
+    ]
+   },
+   "auc_difference_rescored_minus_corpus_base": 1.0554672300600032e-06,
+   "motion": {
+    "frames_with_measurement": 55019,
+    "spearman_logit_region_px": {
+     "small": 0.6678548080008461,
+     "base": 0.6551854384853011
+    },
+    "spearman_m_inner_region_px": {
+     "small": 0.6782447553875453,
+     "base": 0.6678884390004507
+    },
+    "eval_sample": {
+     "frames": 5557,
+     "spearman_m_inner_region_px": {
+      "small": 0.6792144413736624,
+      "base": 0.6707349958943659
+     }
+    }
+   },
+   "operating_points": {
+    "base_r90": {
+     "threshold": 0.23241829999999963,
+     "sharp_kept": 0.8855734791156115,
+     "blur_caught": 0.8915352789891535
+    },
+    "base_r95": {
+     "threshold": 0.05490985000000001,
+     "sharp_kept": 0.7986157864971858,
+     "blur_caught": 0.9441462596444147
+    },
+    "base_r98": {
+     "threshold": 0.016399000000000018,
+     "sharp_kept": 0.661379366062532,
+     "blur_caught": 0.9765179469976518
+    },
+    "small_r90": {
+     "threshold": 0.20402379999999956,
+     "sharp_kept": 0.8840384563595723,
+     "blur_caught": 0.8910320921391032
+    },
+    "small_r95": {
+     "threshold": 0.040729600000000005,
+     "sharp_kept": 0.7829423962513129,
+     "blur_caught": 0.9449289947444929
+    },
+    "small_r98": {
+     "threshold": 0.01123974000000001,
+     "sharp_kept": 0.6403468612824172,
+     "blur_caught": 0.9770770434977077
+    }
+   },
+   "agreement_r95": {
+    "same_decision": 0.956814918482706,
+    "cohen_kappa": 0.9127054410491414,
+    "spearman_logits": 0.9704611887278007,
+    "disagreements": 2376,
+    "of_which_the_vlm_label_sides_with_small": 0.38047138047138046,
+    "small_blurred_base_sharp": 1486,
+    "small_sharp_base_blurred": 890
+   }
+  },
+  {
+   "group": "test films (3)",
+   "n_sharp": 33877,
+   "n_blur": 25791,
+   "auc": {
+    "small": 0.965388567941348,
+    "base": 0.9662894234353732,
+    "base_corpus": 0.9662796153924559,
+    "small_m_inner": 0.9642119009411312,
+    "base_m_inner": 0.963161837754364
+   },
+   "auc_ci95": {
+    "small": [
+     0.9531236198502077,
+     0.9747510147595286
+    ],
+    "base": [
+     0.9544491869256131,
+     0.9750090292014657
+    ],
+    "base_corpus": [
+     0.9544226516882492,
+     0.9750096701426145
+    ],
+    "small_m_inner": [
+     0.9522592937448623,
+     0.9731213193239477
+    ],
+    "base_m_inner": [
+     0.9500549803622238,
+     0.9725100251288435
+    ]
+   },
+   "auc_difference_small_minus_base": {
+    "value": -0.0009008554940251878,
+    "ci95": [
+     -0.0025586119639879057,
+     0.0006911416530289807
+    ]
+   },
+   "auc_difference_rescored_minus_corpus_base": 9.80804291728088e-06,
+   "motion": {
+    "frames_with_measurement": 59668,
+    "spearman_logit_region_px": {
+     "small": 0.7341717740026589,
+     "base": 0.7296601073739947
+    },
+    "spearman_m_inner_region_px": {
+     "small": 0.741578647788829,
+     "base": 0.7475472282707759
+    },
+    "eval_sample": {
+     "frames": 6014,
+     "spearman_m_inner_region_px": {
+      "small": 0.7515206575019482,
+      "base": 0.7570757400260459
+     }
+    }
+   },
+   "operating_points": {
+    "base_r90": {
+     "threshold": 0.23241829999999963,
+     "sharp_kept": 0.8923458393600378,
+     "blur_caught": 0.9224535690744834
+    },
+    "base_r95": {
+     "threshold": 0.05490985000000001,
+     "sharp_kept": 0.8094577441922248,
+     "blur_caught": 0.9535109146601528
+    },
+    "base_r98": {
+     "threshold": 0.016399000000000018,
+     "sharp_kept": 0.6981728016058093,
+     "blur_caught": 0.9698732115854368
+    },
+    "small_r90": {
+     "threshold": 0.20402379999999956,
+     "sharp_kept": 0.8924048764648581,
+     "blur_caught": 0.9214454654724517
+    },
+    "small_r95": {
+     "threshold": 0.040729600000000005,
+     "sharp_kept": 0.7972370634944063,
+     "blur_caught": 0.9555658950796789
+    },
+    "small_r98": {
+     "threshold": 0.01123974000000001,
+     "sharp_kept": 0.6767128140036013,
+     "blur_caught": 0.9713853669884843
+    }
+   },
+   "agreement_r95": {
+    "same_decision": 0.9658275792719716,
+    "cohen_kappa": 0.9314983216169762,
+    "spearman_logits": 0.9790352238045076,
+    "disagreements": 2039,
+    "of_which_the_vlm_label_sides_with_small": 0.41147621383030897,
+    "small_blurred_base_sharp": 1253,
+    "small_sharp_base_blurred": 786
+   }
+  },
+  {
+   "group": "validation + test (6 films)",
+   "n_sharp": 71010,
+   "n_blur": 43677,
+   "auc": {
+    "small": 0.9619642733821342,
+    "base": 0.9626256140259343,
+    "base_corpus": 0.9626186586902005,
+    "small_m_inner": 0.9612002332017155,
+    "base_m_inner": 0.9603210658035086
+   },
+   "auc_ci95": {
+    "small": [
+     0.9539977422786858,
+     0.9688537799884895
+    ],
+    "base": [
+     0.9548249153739852,
+     0.9691925913941765
+    ],
+    "base_corpus": [
+     0.9548174369903918,
+     0.9691922005288856
+    ],
+    "small_m_inner": [
+     0.9534794013109206,
+     0.9678682910978968
+    ],
+    "base_m_inner": [
+     0.9519037495550284,
+     0.9672312571527512
+    ]
+   },
+   "auc_difference_small_minus_base": {
+    "value": -0.0006613406438000791,
+    "ci95": [
+     -0.0018336700516809912,
+     0.00039004528013431017
+    ]
+   },
+   "auc_difference_rescored_minus_corpus_base": 6.955335733804802e-06,
+   "motion": {
+    "frames_with_measurement": 114687,
+    "spearman_logit_region_px": {
+     "small": 0.7050308228345334,
+     "base": 0.6991252625080118
+    },
+    "spearman_m_inner_region_px": {
+     "small": 0.7154073941867979,
+     "base": 0.715527883298307
+    },
+    "eval_sample": {
+     "frames": 11571,
+     "spearman_m_inner_region_px": {
+      "small": 0.722106542901342,
+      "base": 0.72238232624441
+     }
+    },
+    "spearman_logit_ci95": {
+     "small": [
+      0.6784270756770207,
+      0.7296768255309545
+     ],
+     "base": [
+      0.6728390196302787,
+      0.7242222580165217
+     ]
+    },
+    "spearman_logit_difference_small_minus_base": {
+     "value": 0.005905560326521675,
+     "ci95": [
+      0.0005730069928394671,
+      0.01121253209004155
+     ]
+    }
+   },
+   "operating_points": {
+    "base_r90": {
+     "threshold": 0.23241829999999963,
+     "sharp_kept": 0.8888043937473595,
+     "blur_caught": 0.9097923392174371
+    },
+    "base_r95": {
+     "threshold": 0.05490985000000001,
+     "sharp_kept": 0.8037881988452331,
+     "blur_caught": 0.9496760308629255
+    },
+    "base_r98": {
+     "threshold": 0.016399000000000018,
+     "sharp_kept": 0.6789325447120124,
+     "blur_caught": 0.9725942715845869
+    },
+    "small_r90": {
+     "threshold": 0.20402379999999956,
+     "sharp_kept": 0.8880298549500071,
+     "blur_caught": 0.9089910021292671
+    },
+    "small_r95": {
+     "threshold": 0.040729600000000005,
+     "sharp_kept": 0.789762005351359,
+     "blur_caught": 0.9512100190031366
+    },
+    "small_r98": {
+     "threshold": 0.01123974000000001,
+     "sharp_kept": 0.657696099140966,
+     "blur_caught": 0.9737161435080248
+    }
+   },
+   "agreement_r95": {
+    "same_decision": 0.9615039193631362,
+    "cohen_kappa": 0.9229685412859133,
+    "spearman_logits": 0.9760595376921457,
+    "disagreements": 4415,
+    "of_which_the_vlm_label_sides_with_small": 0.39479048697621744,
+    "small_blurred_base_sharp": 2739,
+    "small_sharp_base_blurred": 1676
+   }
+  }
+ ],
+ "films": [
+  {
+   "film": "test film B",
+   "role": "test",
+   "shots": 446,
+   "n_sharp": 20166,
+   "n_blur": 10786,
+   "auc": {
+    "small": 0.9756142136344734,
+    "base": 0.9764086190496866,
+    "base_corpus": 0.97641315216468,
+    "small_m_inner": 0.9745170251018163,
+    "base_m_inner": 0.9750808163373244
+   }
+  },
+  {
+   "film": "test film C",
+   "role": "test",
+   "shots": 121,
+   "n_sharp": 4158,
+   "n_blur": 5525,
+   "auc": {
+    "small": 0.9792021486139133,
+    "base": 0.9804135080605669,
+    "base_corpus": 0.9804125721772781,
+    "small_m_inner": 0.9789326359914595,
+    "base_m_inner": 0.9797667909432616
+   }
+  },
+  {
+   "film": "test film A",
+   "role": "test",
+   "shots": 378,
+   "n_sharp": 9553,
+   "n_blur": 9480,
+   "auc": {
+    "small": 0.9544173831888805,
+    "base": 0.9541897391457209,
+    "base_corpus": 0.9541684278824643,
+    "small_m_inner": 0.9519687852933291,
+    "base_m_inner": 0.9469206494436325
+   }
+  },
+  {
+   "film": "validation film A",
+   "role": "validation",
+   "shots": 396,
+   "n_sharp": 14138,
+   "n_blur": 6234,
+   "auc": {
+    "small": 0.9591345526539737,
+    "base": 0.9585639307358199,
+    "base_corpus": 0.9585665176383867,
+    "small_m_inner": 0.9604524944162616,
+    "base_m_inner": 0.9597579848265003
+   }
+  },
+  {
+   "film": "validation film B",
+   "role": "validation",
+   "shots": 358,
+   "n_sharp": 17362,
+   "n_blur": 6978,
+   "auc": {
+    "small": 0.9512726843484496,
+    "base": 0.9535829179131583,
+    "base_corpus": 0.9535766613117422,
+    "small_m_inner": 0.9504924415797684,
+    "base_m_inner": 0.9511659259279803
+   }
+  },
+  {
+   "film": "validation film C",
+   "role": "validation",
+   "shots": 151,
+   "n_sharp": 5633,
+   "n_blur": 4674,
+   "auc": {
+    "small": 0.9646477968745977,
+    "base": 0.9645045118544283,
+    "base_corpus": 0.9645042649750033,
+    "small_m_inner": 0.9604438010893231,
+    "base_m_inner": 0.9582301282382889
+   }
+  }
+ ],
+ "scoring": "device cuda (114,687 frames), the published Update 1 loader, ConvNeXt trunk under bfloat16 autocast, fingerprint float32, batch 1"
+}

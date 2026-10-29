@@ -60,3 +60,61 @@ def test_heldout_intervals_contain_their_auc():
     for item in heldout["films"] + [g for g in heldout["groups"] if "auc_ci95" in g]:
         low, high = item["auc_ci95"]
         assert low <= item["auc"] <= high
+
+
+EXPERIMENT = ROOT / "experiments" / "r4s1_small_base"
+
+
+@pytest.mark.parametrize("path", sorted((EXPERIMENT / "data").glob("*.json")), ids=lambda p: p.name)
+def test_experiment_results_are_strict_json(path):
+    strict(path)
+
+
+def test_experiment_manifest_matches_the_files():
+    import hashlib
+    manifest = strict(EXPERIMENT / "MANIFEST.json")
+    on_disk = {p.relative_to(EXPERIMENT).as_posix() for p in EXPERIMENT.rglob("*")
+               if p.is_file() and p.name != "MANIFEST.json" and "__pycache__" not in p.parts}
+    assert set(manifest["files"]) == on_disk
+    for name, digest in manifest["files"].items():
+        data = (EXPERIMENT / name).read_bytes()
+        if name.endswith((".md", ".py", ".json", ".log", ".sha256")):
+            # git may check text files out with CRLF line ends (core.autocrlf); the hashes are of the LF files
+            data = data.replace(b"\r\n", b"\n")
+        assert hashlib.sha256(data).hexdigest() == digest, name
+
+
+def test_experiment_protocol_is_the_registered_one():
+    import hashlib
+    digest = hashlib.sha256((EXPERIMENT / "PROTOCOL_hu.md").read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    assert digest in (EXPERIMENT / "PROTOCOL.sha256").read_text(encoding="utf-8")
+
+
+def test_experiment_controls_match_the_published_evidence():
+    heldout = strict(EXPERIMENT / "data" / "results_heldout.json")
+    published = {f["film"]: f["auc"] for f in strict(ROOT / "reproduction" / "heldout_films.json")["films"]}
+    for c in heldout["control_rescored_base_vs_published"]:
+        assert c["published_auc"] == published[c["film"]]
+        assert abs(c["rescored_base_auc"] - c["published_auc"]) < 5e-5
+    ladder = strict(EXPERIMENT / "data" / "results_ladder.json")["control_base_vs_published"]
+    assert ladder["max_abs_share_difference"] == 0 and ladder["max_abs_median_logit_difference"] == 0
+
+
+def test_readme_and_report_quote_the_experiment():
+    flat = lambda p: " ".join(p.read_text(encoding="utf-8").split())                    # noqa: E731
+    readme, report = flat(ROOT / "README.md"), flat(EXPERIMENT / "REPORT.md")
+    num = lambda v, d=4: f"{v:+.{d}f}".replace("-", "−")                                 # noqa: E731
+    six = {g["group"]: g for g in strict(EXPERIMENT / "data" / "results_heldout.json")["groups"]}["validation + test (6 films)"]
+    d = six["auc_difference_small_minus_base"]
+    quoted = f"{num(d['value'])} [{num(d['ci95'][0])}, {num(d['ci95'][1])}]"
+    assert quoted in readme and quoted in report
+    assert f"the AUC is {six['auc']['small']:.3f} for the Small and {six['auc']['base']:.3f} for the Base" in readme
+    op = six["operating_points"]
+    assert f"keeps {100 * op['small_r95']['sharp_kept']:.1f}% of the sharp frames, the Base {100 * op['base_r95']['sharp_kept']:.1f}%" in readme
+    rho = six["motion"]["spearman_logit_region_px"]
+    assert f"Spearman {rho['small']:.3f} against {rho['base']:.3f}" in readme
+    flips = {m: v["flip_L_50pct"]["r95"] for m, v in strict(EXPERIMENT / "data" / "results_ladder.json")["models"].items()}
+    assert f"{flips['small']:.2f} px against {flips['base']:.2f} px" in readme
+    speed = strict(EXPERIMENT / "data" / "speed.json")
+    ms = {m: speed["models"][m]["batch_1"]["ms_per_image"] for m in ("small", "base")}
+    assert f"{speed['small_over_base_batch_1']:.2f}× faster: {ms['small']:.1f} against {ms['base']:.1f} ms" in readme

@@ -1,0 +1,24 @@
+{
+ "base": {
+  "file": "round3_base_p99_ep029.pt",
+  "sha256": "9840160f0c337fc1312c2566abf4231be0bd7ee709f65f489fd8f81c65b8d0e6",
+  "epoch": 29,
+  "arch": "convnext_base",
+  "thresholds": {
+   "r90": 0.23241829999999963,
+   "r95": 0.05490985000000001,
+   "r98": 0.016399000000000018
+  }
+ },
+ "small": {
+  "file": "round3_small_p99_ep029.pt",
+  "sha256": "b715a163f9c6927464d97b7002967c8361c6a0de2b87e3103dc72a7ba733d48b",
+  "epoch": 29,
+  "arch": "convnext_small",
+  "thresholds": {
+   "r90": 0.20402379999999956,
+   "r95": 0.040729600000000005,
+   "r98": 0.01123974000000001
+  }
+ }
+}
